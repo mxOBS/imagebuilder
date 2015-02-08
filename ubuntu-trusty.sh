@@ -62,6 +62,9 @@ deb-src http://ports.ubuntu.com/ubuntu-ports trusty-security main
 deb-src http://ports.ubuntu.com/ubuntu-ports trusty-updates main
 EOF
 
+# populate fstab
+echo "/dev/mmcblk0p1 / ext4 defaults,noatime 0 0" >> build/etc/fstab
+
 # create user
 chroot_add_user $DUSER $DPASS "sudo,audio,video"
 

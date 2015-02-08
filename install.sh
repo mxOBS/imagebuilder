@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 usage() {
-	echo $0 <device> <tarball>
+	echo "$0 <device> <tarball>"
 	exit 1
 }
 
@@ -38,11 +38,11 @@ EOF
 partprobe "$device"
 
 # create filesystem
-mkfs.ext4 -L "rootfs" "${device}p1"
+mkfs.ext4 -L "rootfs" "${device}1"
 
 # mount filesystem
 mkdir -p mnt
-mount "${device}p1" mnt
+mount "${device}1" mnt
 
 # unpack tarball
 tar --numeric-owner -C mnt -xvpf "$tarball"
