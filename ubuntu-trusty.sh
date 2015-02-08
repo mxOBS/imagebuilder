@@ -7,6 +7,7 @@ source functions.inc
 DEB_MIRROR=http://ports.ubuntu.com/ubuntu-ports
 DEB_RELEASE=trusty
 DEB_ARCH=armhf
+DEB_EXTRA_PKGS="openssh-server"
 DUSER=solidrun
 DPASS=solidrun
 
@@ -15,7 +16,7 @@ precheck
 
 # install base system
 echo Running debootstrap
-debootstrap --no-check-gpg --arch=$DEB_ARCH $DEB_RELEASE build $DEB_MIRROR
+debootstrap --no-check-gpg --arch=$DEB_ARCH --include="$DEB_EXTRA_PKGS" $DEB_RELEASE build $DEB_MIRROR
 
 # add BSP repo
 cat > build/etc/apt/sources.list.d/bsp.list << EOF
