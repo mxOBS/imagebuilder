@@ -7,9 +7,10 @@ source functions.inc
 DEB_MIRROR=http://ftp.debian.org/debian
 DEB_RELEASE=wheezy
 DEB_ARCH=armhf
-DEB_EXTRA_PKGS="openssh-server sudo"
+DEB_EXTRA_PKGS="openssh-server sudo ca-certificates ntp fbset"
 DUSER=solidrun
 DPASS=solidrun
+DHOSTNAME=imx6
 
 # check build environment
 precheck
@@ -46,8 +47,14 @@ cd ../..
 
 # remove traces of build-system
 rm -f build/etc/resolv.conf
+sudo sed -i "s;$HOSTNAME;$DHOSTNAME;g" build/etc/{hostname,ssh/*.pub}
+
+# delete apt cache (its huge)
+chroot_run apt-get clean
 
 # CONFIGURATION
+# set hostname in hosts file too
+echo "127.0.1.1 $DHOSTNAME" >> build/etc/hosts
 
 # add update repos
 cat >> build/etc/apt/sources.list << EOF
@@ -81,7 +88,7 @@ tar --numeric-owner -cpvf ../debian-wheezy.tar *
 cd ..
 
 # compress
-pigz debian-wheezy.tar
+pigz -v debian-wheezy.tar
 
 # CLEANUP
 
