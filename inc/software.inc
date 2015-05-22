@@ -1,3 +1,20 @@
+function restore_aptcache() {
+	buildroot=$1
+
+	if [ -e $distro.pkgcache.tar ]; then
+		tar -C $buildroot -xf $distro.pkgcache.tar
+	fi
+}
+
+function save_aptcache() {
+	buildroot=$1
+
+	curdir="$PWD"
+	pushd $buildroot
+	tar -cf "$curdir/$distro.pkgcache.tar" var/cache/apt/archives/*.deb
+	popd
+}
+
 # usage: <buildroot>
 install_base() {
 	buildroot=$1

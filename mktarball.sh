@@ -48,9 +48,15 @@ qemu_setup build
 # add repos
 add_repos build $distro
 
+# restore apt cache from previous runs
+restore_aptcache build
+
 # install software selection
 install_base build
 # TODO: desktop
+
+# save apt cache for later use
+save_aptcache build
 
 # configure system
 configure_system build
