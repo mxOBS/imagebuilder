@@ -17,7 +17,7 @@ bootstrap_system() {
 
 	# create tarball of packages if it doesnt exist yet
 	if [ ! -e $distro.bootstrap.tar ]; then
-		debootstrap --no-check-gpg --arch=armhf --make-tarball=$PWD/$distro.bootstrap.tar --download-only $distro build $mirror
+		debootstrap --no-check-gpg --arch=armhf --make-tarball=$PWD/$distro.bootstrap.tar $distro build $mirror
 	fi
 
 	# handle the need for qemu
