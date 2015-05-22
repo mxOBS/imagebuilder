@@ -15,12 +15,19 @@ bootstrap_system() {
 		mirror="http://ports.ubuntu.com/ubuntu-ports"
 	fi
 
+	# create, or reuse tarball of packages
+	if [ -e $distro.bootstrap.tar ]; then
+		TBARGS="--unpack-tarball=$distro.bootstrap.tar"
+	else
+		TBAGRS="--make-tarball=$distro.bootstrap.tar"
+	fi
+
 	# handle the need for qemu
 	if [[ `uname -m` = arm* ]]; then
-		debootstrap --no-check-gpg --arch=armhf $distro build $mirror
+		debootstrap --no-check-gpg --arch=armhf $TBARGS $distro build $mirror
 	else
 		# first stage
-		debootstrap --no-check-gpg --foreign --arch=armhf $distro build $mirror
+		debootstrap --no-check-gpg --foreign --arch=armhf $TBARGS $distro build $mirror
 
 		# copy qemu
 		qemu_setup $buildroot
