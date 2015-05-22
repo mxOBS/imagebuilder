@@ -15,5 +15,20 @@ bootstrap_system() {
 		mirror="http://ports.ubuntu.com/ubuntu-ports"
 	fi
 
-	debootstrap --no-check-gpg --arch=armhf $distro build $mirror
+	# handle the need for qemu
+	if [[ `uname -m` = arm* ]]; then
+		debootstrap --no-check-gpg --arch=armhf $distro build $mirror
+	else
+		# first stage
+		debootstrap --no-check-gpg --foreign --arch=armhf $distro build $mirror
+
+		# copy qemu
+		qemu_setup $buildroot
+
+		# second stage in chroot
+		chroot $buildroot /bin/bash /debootstrap/debootstrap --second-stage
+
+		# remove qemu again
+		qemu_remove $buildroot
+	fi
 }
