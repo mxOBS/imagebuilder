@@ -37,5 +37,9 @@ bootstrap_system() {
 
 		# remove qemu again
 		qemu_remove $buildroot
+
+		# third stage
+		# copy resolv.conf
+		cp /etc/resolv.conf $buildroot/etc/
 	fi
 }
