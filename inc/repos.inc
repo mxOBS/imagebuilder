@@ -4,6 +4,33 @@ add_repos() {
 	buildroot=$1
 	distro=$2
 
+	# start with distribution default repos
+	repofile=$buildroot/etc/apt/sources.list
+	if [ "$distro" = "wheezy" ]; then
+		echo "deb http://httpredir.debian.org/debian wheezy main" > $repofile
+		echo "deb-src http://httpredir.debian.org/debian wheezy main" >> $repofile
+		echo "deb http://httpredir.debian.org/debian wheezy-updates main" >> $repofile
+		echo "deb-src http://httpredir.debian.org/debian wheezy-updates main" >> $repofile
+		echo "deb http://security.debian.org/ wheezy/updates main" >> $repofile
+		echo "deb-src http://security.debian.org/ wheezy/updates main" >> $repofile
+	fi
+	if [ "$distro" = "jessie" ]; then
+		echo "deb http://httpredir.debian.org/debian jessie main" > $repofile
+		echo "deb-src http://httpredir.debian.org/debian jessie main" >> $repofile
+		echo "deb http://httpredir.debian.org/debian jessie-updates main" >> $repofile
+		echo "deb-src http://httpredir.debian.org/debian jessie-updates main" >> $repofile
+		echo "deb http://security.debian.org/ jessie/updates main" >> $repofile
+		echo "deb-src http://security.debian.org/ jessie/updates main" >> $repofile
+	fi
+	if [ "$distro" = "trusty" ]; then
+		echo "deb http://ports.ubuntu.com/ubuntu-ports/ trusty main" > $repofile
+		echo "deb-src http://ports.ubuntu.com/ubuntu-ports/ trusty main" >> $repofile
+		echo "deb http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main" >> $repofile
+		echo "deb-src http://ports.ubuntu.com/ubuntu-ports/ trusty-updates main" >> $repofile
+		echo "deb http://ports.ubuntu.com/ubuntu-ports/ trusty-security main" >> $repofile
+		echo "deb-src http://ports.ubuntu.com/ubuntu-ports/ trusty-security main" >> $repofile
+	fi
+
 	# i.MX6 BSP repo
 	repofile=$buildroot/etc/apt/sources.list.d/imx6.list
 	prefsfile=$buildroot/etc/apt/preferences.d/imx6
