@@ -57,7 +57,7 @@ install_base() {
 	echo "/dev/mmcblk0p1 / ext4 defaults 0 0" >> build/etc/fstab
 
 	# create uEnv.txt
-	echo "mmcroot=/dev/mmcblk0p1 rootwait rw" > $buildroot/boot/uEnv.txt
+	echo "mmcroot=/dev/mmcblk0p1 rootwait rw enable_wait_mode=off" > $buildroot/boot/uEnv.txt
 }
 
 # TODO: desktops
