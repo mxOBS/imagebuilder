@@ -20,21 +20,15 @@ bootstrap_system() {
 		debootstrap --no-check-gpg --arch=armhf --make-tarball=$PWD/$distro.bootstrap.tar $distro build $mirror
 	fi
 
-	# handle the need for qemu
+	# on foreign architectures, run second stage manually
 	if [[ `uname -m` = arm* ]]; then
 		debootstrap --no-check-gpg --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $distro build $mirror
 	else
 		# first stage
 		debootstrap --no-check-gpg --foreign --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $distro build $mirror
 
-		# copy qemu
-		qemu_setup $buildroot
-
 		# second stage in chroot
-		chroot $buildroot /bin/bash /debootstrap/debootstrap --second-stage
-
-		# remove qemu again
-		qemu_remove $buildroot
+		chroot_run $buildroot "/bin/bash /debootstrap/debootstrap --second-stage"
 
 		# third stage
 		# copy resolv.conf

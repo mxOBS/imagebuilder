@@ -43,7 +43,6 @@ fi
 
 # bootstrap system
 bootstrap_system build $distro
-qemu_setup build
 
 # add repos
 add_repos build $distro
@@ -63,7 +62,6 @@ configure_system build
 
 # remove traces of build-system
 cleanup_system build
-qemu_remove build
 
 # make tarball
 pushd build; tar -cf ../$distro.tar *; popd
