@@ -23,7 +23,7 @@ install_base() {
 	PKGS=
 
 	# required packages for startup
-	PKGS=("${PKGS[@]}" "kernel-cubox-i" "u-boot-cubox-i")
+	PKGS=("${PKGS[@]}" "kernel-cubox-i" "u-boot-cubox-i" "initramfs-tools")
 
 	# i.MX6 specific base system
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config")
@@ -44,6 +44,13 @@ install_base() {
 	# select kernel to boot
 	# TODO: integrate with package
 	pushd $buildroot/boot; ln -sv zImage-* zImage; popd
+
+	# create initramfs
+	for kernel in $buildroot/boot/zImage-*; do
+		localversion=`basename $kernel | sed -e "s;^zImage-;;g"`
+		chroot_run $buildroot "/bin/bash /usr/sbin/update-initramfs -c -k $localversion"
+	done
+	pushd $buildroot/boot; ln -sv initrd.img-* initrd; popd
 
 	# add root filesystem to fstab
 	# TODO: move to the part that actually creates the sdcard
