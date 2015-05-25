@@ -15,6 +15,19 @@ function save_aptcache() {
 	popd
 }
 
+block_services_enable() {
+	buildroot=$1
+
+	echo "exit 101" > $buildroot/usr/sbin/policy-rc.d
+	chmod 777 $buildroot/usr/sbin/policy-rc.d
+}
+
+block_services_disable() {
+	buildroot=$1
+
+	rm -f $buildroot/usr/sbin/policy-rc.d
+}
+
 # usage: <buildroot>
 install_base() {
 	buildroot=$1
@@ -29,28 +42,30 @@ install_base() {
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config")
 
 	# install useful software for a commandline environment
-	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset")
+	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "alsa-utils")
 
-	# HACK: prevent apt from running init-scripts
-	echo "exit 101" > $buildroot/usr/sbin/policy-rc.d
-	chmod 777 $buildroot/usr/sbin/policy-rc.d
+	# prevent apt from running init-scripts
+	block_services_enable $buildroot
 
 	# install packages
 	chroot_run $buildroot "apt-get -y install ${PKGS[@]}"
 
-	# UNHACK
-	rm -f $buildroot/usr/sbin/policy-rc.d
-
-	# select kernel to boot
-	# TODO: integrate with package
-	pushd $buildroot/boot; ln -sv zImage-* zImage; popd
+	# unblock
+	block_services_disable $buildroot
 
 	# create initramfs
 	for kernel in $buildroot/boot/zImage-*; do
 		localversion=`basename $kernel | sed -e "s;^zImage-;;g"`
 		chroot_run $buildroot "/bin/bash /usr/sbin/update-initramfs -c -k $localversion"
 	done
-	pushd $buildroot/boot; ln -sv initrd.img-* initrd; popd
+
+	# create boot symlinks
+	for kernel in $buildroot/boot/zImage-*; do
+		localversion=`basename $kernel | sed -e "s;^zImage-;;g"`
+		ln -sv zImage-$localversion $buildroot/boot/zImage
+		ln -sv initrd.img-$localversion $buildroot/boot/initrd
+		break
+	done
 
 	# add root filesystem to fstab
 	# TODO: move to the part that actually creates the sdcard
@@ -60,4 +75,37 @@ install_base() {
 	echo "mmcroot=/dev/mmcblk0p1 rootwait rw enable_wait_mode=off" > $buildroot/boot/uEnv.txt
 }
 
-# TODO: desktops
+install_x11() {
+	buildroot=$1
+
+	# install galcore dummy packages, if they are available
+	for pkg in $buildroot/var/cache/apt/archives/galcore-dummy*.deb; do
+		name=`basename $pkg`
+		chroot_run $buildroot "dpkg -i /var/cache/apt/archives/$name"
+	done
+
+	block_services_enable $buildroot
+	chroot_run $buildroot "apt-get -y install imx-gpu-viv imx-gpu-viv-x11 xserver-xorg-video-imx-viv xserver-xorg-core gstreamer1.0-imx xinit lightdm"
+	block_services_disable $buildroot
+}
+
+install_mate() {
+	buildroot=$1
+
+	install_x11 $buildroot
+
+	block_services_enable $buildroot
+	chroot_run $buildroot "apt-get -y install mate-desktop-environment icedove"
+	block_services_disable $buildroot
+}
+
+# todo: xfce, kde, gnome3
+
+install_desktop() {
+	buildroot=$1
+	type=$2
+
+	if [ "$type" = "mate" ]; then
+		install_mate $buildroot
+	fi
+}

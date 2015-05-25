@@ -7,16 +7,23 @@ done
 
 # check arguments
 usage() {
-	echo "Usage: $0 <distro-codename>"
+	echo "Usage: $0 <distro-codename> <image-type>"
 	echo "distro-codename: [wheezy,jessie,trusty]"
+	echo "image-type: [cli,mate]"
 }
-if [ $# != 1 ]; then
+if [ $# != 2 ]; then
 	usage
 	exit 1
 fi
 
 distro=$1
 if [ "$distro" != "wheezy" ] && [ "$distro" != "jessie" ] && [ "$distro" != "trusty" ]; then
+	usage
+	exit 1
+fi
+
+type=$2
+if [ "$type" != "cli" ] && [ "$type" != "mate" ]; then
 	usage
 	exit 1
 fi
@@ -52,7 +59,8 @@ restore_aptcache build
 
 # install software selection
 install_base build
-# TODO: desktop
+
+install_desktop build $type
 
 # save apt cache for later use
 save_aptcache build
