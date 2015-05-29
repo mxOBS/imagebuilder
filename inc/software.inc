@@ -42,13 +42,19 @@ install_base() {
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config")
 
 	# install useful software for a commandline environment
-	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "alsa-utils")
+	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "alsa-utils" "bluez")
 
 	# prevent apt from running init-scripts
 	block_services_enable $buildroot
 
 	# install packages
 	chroot_run $buildroot "apt-get -y install ${PKGS[@]}"
+
+	# install galcore dummy packages, if they are available
+	for pkg in $buildroot/var/cache/apt/archives/galcore-dummy*.deb; do
+		name=`basename $pkg`
+		chroot_run $buildroot "dpkg -i /var/cache/apt/archives/$name"
+	done
 
 	# unblock
 	block_services_disable $buildroot
@@ -75,37 +81,61 @@ install_base() {
 	echo "mmcroot=/dev/mmcblk0p1 rootwait rw enable_wait_mode=off" > $buildroot/boot/uEnv.txt
 }
 
-install_x11() {
-	buildroot=$1
+collect_x11() {
+	distro=$1
 
-	# install galcore dummy packages, if they are available
-	for pkg in $buildroot/var/cache/apt/archives/galcore-dummy*.deb; do
-		name=`basename $pkg`
-		chroot_run $buildroot "dpkg -i /var/cache/apt/archives/$name"
-	done
+	# collect packages
+	PKGS=
 
-	block_services_enable $buildroot
-	chroot_run $buildroot "apt-get -y install imx-gpu-viv imx-gpu-viv-x11 xserver-xorg-video-imx-viv xserver-xorg-core gstreamer1.0-imx xinit lightdm"
-	block_services_disable $buildroot
+	# core Xorg
+	PKGS=("${PKGS[@]}" "xserver-xorg-core" "xinit" "lightdm")
+
+	# Hardware acceleration packages
+	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx")
+	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
+	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
+
+	echo ${PKGS[@]}
 }
 
-install_mate() {
-	buildroot=$1
+collect_mate() {
+	distro=$1
 
-	install_x11 $buildroot
+	PKGS=(`collect_x11 $distro`)
 
-	block_services_enable $buildroot
-	chroot_run $buildroot "apt-get -y install mate-desktop-environment icedove"
-	block_services_disable $buildroot
+	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman")
+
+	echo ${PKGS[@]}
 }
 
-# todo: xfce, kde, gnome3
+collect_xfce() {
+	distro=$1
+
+	PKGS=(`collect_x11 $distro`)
+
+	PKGS=("${PKGS[@]}" "xfce4")
+
+	echo ${PKGS[@]}
+}
+
+# todo: kde, gnome3
 
 install_desktop() {
 	buildroot=$1
-	type=$2
+	distro=$2
+	type=$3
 
-	if [ "$type" = "mate" ]; then
-		install_mate $buildroot
-	fi
+	# collect packages
+	PKGS=
+	[ "$type" = "mate" ] && PKGS=("${PKGS[@]}" "`collect_mate $distro`")
+	[ "$type" = "xfce" ] && PKGS=("${PKGS[@]}" "`collect_xfce $distro`")
+
+	# some default applications
+	PKGS=("${PKGS[@]}" "iceweasel" "icedove")
+	test $distro -eq wheezy -o $distro = trusty && PKGS=("${PKGS[@]}" "chromium-browser")
+
+	# install packages
+	block_services_enable $buildroot
+	chroot_run $buildroot "apt-get -y install ${PKGS[@]}"
+	block_services_disable $buildroot
 }

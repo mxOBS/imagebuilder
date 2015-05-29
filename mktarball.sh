@@ -9,7 +9,7 @@ done
 usage() {
 	echo "Usage: $0 <distro-codename> <image-type>"
 	echo "distro-codename: [wheezy,jessie,trusty]"
-	echo "image-type: [cli,mate]"
+	echo "image-type: [cli,xfce,mate]"
 }
 if [ $# != 2 ]; then
 	usage
@@ -23,7 +23,7 @@ if [ "$distro" != "wheezy" ] && [ "$distro" != "jessie" ] && [ "$distro" != "tru
 fi
 
 type=$2
-if [ "$type" != "cli" ] && [ "$type" != "mate" ]; then
+if [ "$type" != "cli" ] && [ "$type" != "mate" ] && [ "$type" != "xfce" ]; then
 	usage
 	exit 1
 fi
@@ -60,7 +60,7 @@ restore_aptcache build
 # install software selection
 install_base build
 
-install_desktop build $type
+install_desktop build $distro $type
 
 # save apt cache for later use
 save_aptcache build
