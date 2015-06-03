@@ -91,7 +91,7 @@ collect_x11() {
 	PKGS=("${PKGS[@]}" "xserver-xorg-core" "xinit" "lightdm")
 
 	# Hardware acceleration packages
-	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx")
+	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx")
 	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
 	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
 
@@ -124,6 +124,8 @@ install_desktop() {
 	buildroot=$1
 	distro=$2
 	type=$3
+
+	[ "$type" = "cli" ] && return 0
 
 	# collect packages
 	PKGS=
