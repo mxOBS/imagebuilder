@@ -42,7 +42,7 @@ install_base() {
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
 
 	# install useful software for a commandline environment
-	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "alsa-utils" "bluez")
+	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "alsa-utils" "bluez" "command-not-found")
 
 	# prevent apt from running init-scripts
 	block_services_enable $buildroot
@@ -52,9 +52,13 @@ install_base() {
 
 	# install galcore dummy packages, if they are available
 	for pkg in $buildroot/var/cache/apt/archives/galcore-dummy*.deb; do
+		test -e $pkg || continue
 		name=`basename $pkg`
 		chroot_run $buildroot "dpkg -i /var/cache/apt/archives/$name"
 	done
+
+	# update command-not-found cache
+	chroot_run $buildroot /usr/sbin/update-command-not-found
 
 	# unblock
 	block_services_disable $buildroot
