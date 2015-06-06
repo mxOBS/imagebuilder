@@ -89,11 +89,11 @@ install_base() {
 #!/bin/sh
 /bin/bash /usr/share/imx6-config/expand-fs /dev/mmcblk0 /dev/mmcblk0p1
 s=\$?
-if [ \$? = 2 ]; then
+if [ \$s = 2 ]; then
 	runonce-helper add expand-fs-stage2 /bin/bash /usr/share/imx6-config/expand-fs /dev/mmcblk0 /dev/mmcblk0p1 2
 	exit 0
 fi
-exit \$?
+exit \$s
 EOF
 }
 
@@ -150,7 +150,8 @@ install_desktop() {
 
 	# some default applications
 	PKGS=("${PKGS[@]}" "iceweasel" "icedove")
-	test $distro -eq wheezy -o $distro = trusty && PKGS=("${PKGS[@]}" "chromium-browser")
+	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "chromium-browser")
+	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "chromium-browser")
 
 	# install packages
 	block_services_enable $buildroot
