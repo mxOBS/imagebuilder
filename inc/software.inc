@@ -104,8 +104,8 @@ collect_x11() {
 
 	# Hardware acceleration packages
 	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx")
-	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
-	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
+	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
+	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
 
 	echo ${PKGS[@]}
 }
