@@ -39,7 +39,7 @@ install_base() {
 	PKGS=("${PKGS[@]}" "kernel-cubox-i" "u-boot-cubox-i" "initramfs-tools")
 
 	# i.MX6 specific base system
-	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config")
+	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
 
 	# install useful software for a commandline environment
 	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "alsa-utils" "bluez")
@@ -75,10 +75,22 @@ install_base() {
 
 	# add root filesystem to fstab
 	# TODO: move to the part that actually creates the sdcard
-	echo "/dev/mmcblk0p1 / ext4 defaults 0 0" >> build/etc/fstab
+	echo "/dev/mmcblk0p1 / ext4 defaults 0 0" >> $buildroot/etc/fstab
 
 	# create uEnv.txt
 	echo "mmcroot=/dev/mmcblk0p1 rootwait rw enable_wait_mode=off" > $buildroot/boot/uEnv.txt
+
+	# resize FS on first boot
+	cat > $buildroot/etc/runonce.d/expand-fs.sh << EOF
+#!/bin/sh
+/bin/bash /usr/share/imx6-config/expand-fs /dev/mmcblk0 /dev/mmcblk0p1
+s=\$?
+if [ \$? = 2 ]; then
+	runonce-helper add expand-fs-stage2 /bin/bash /usr/share/imx6-config/expand-fs /dev/mmcblk0 /dev/mmcblk0p1 2
+	exit 0
+fi
+exit \$?
+EOF
 }
 
 collect_x11() {
