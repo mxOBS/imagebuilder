@@ -45,7 +45,7 @@ function cleanup() {
 trap cleanup INT TERM EXIT
 
 # create image file
-IMG=linux.img
+IMG=`basename $archive .tar`.img
 count=`echo $size/4 | bc`
 printf "Creating %s with a size of %sM: " $IMG $size
 dd if=/dev/zero of="$IMG" bs=4M count=$count 1>/dev/null 2>/dev/null
