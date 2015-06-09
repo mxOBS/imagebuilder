@@ -1,7 +1,8 @@
 # usage: <buildroot> <cmd>
 chroot_run() {
 	buildroot=$1
-	cmd=`echo $@ | sed -e "s;^$buildroot ;;g"`
+	shift
+	cmd="$@"
 
 	qemu_setup $buildroot
 	chroot "$buildroot" $cmd

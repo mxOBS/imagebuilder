@@ -11,9 +11,15 @@ configure_system() {
 
 	# configure network
 	# default: dhcp on eth0
-	# TODO: add placeholders for wlan
 	echo "auto eth0" >> $buildroot/etc/network/interfaces
 	echo "iface eth0 inet dhcp" >> $buildroot/etc/network/interfaces
+	echo "" >> $buildroot/etc/network/interfaces
+	echo "# To find out how to properly use this file, see the examples at /usr/share/doc/ifupdown/examples/network-interfaces.gz!" >> $buildroot/etc/network/interfaces
+	echo "# gzip -dck /usr/share/doc/ifupdown/examples/network-interfaces.gz | less" >> $buildroot/etc/network/interfaces
+
+	# autogenerate ssh-keys on first boot, and delete the current ones
+	rm -fv $buildroot/etc/ssh/*_key{,.pub}
+	chroot_run $buildroot runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reconfigure openssh-server
 
 	# create default user
 	user=solidrun
@@ -23,7 +29,9 @@ configure_system() {
 	chroot_run $buildroot useradd -G $groups -m -U -s /bin/bash -p $password_encrypted $user
 
 	# enable lightdm autologin
-	sed -e "s;#autologin-user=*;autologin-user=$user;g" \
-	    -e "s;#autologin-user-timeout=*;autologin-user-timeout=5;g" \
-	    -i $buildroot/etc/lightdm/lightdm.conf
+	if [ -e "$buildroot/etc/lightdm/lightdm.conf" ]; then
+		sed -e "s;#autologin-user-timeout=0;autologin-user-timeout=5;g" \
+		    -e "s;#autologin-user=;autologin-user=$user;g" \
+		    -i $buildroot/etc/lightdm/lightdm.conf
+	fi
 }

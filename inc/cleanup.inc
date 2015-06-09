@@ -5,7 +5,4 @@ cleanup_system() {
 
 	# remove resolv.conf of host system
 	rm -vf $buildroot/etc/resolv.conf
-
-	# delete ssh-keys; it is very insecure to have them pregenerated!
-	rm -fv $buildroot/etc/ssh/*_key{,.pub}
 }
