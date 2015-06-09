@@ -42,7 +42,7 @@ install_base() {
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
 
 	# install useful software for a commandline environment
-	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "alsa-utils" "bluez" "command-not-found" "bash-completion")
+	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "alsa-utils" "bluez" "command-not-found" "bash-completion" "mediainfo")
 
 	# prevent apt from running init-scripts
 	block_services_enable $buildroot
@@ -106,8 +106,8 @@ collect_x11() {
 	# core Xorg
 	PKGS=("${PKGS[@]}" "xserver-xorg-core" "xinit" "lightdm")
 
-	# Hardware acceleration packages
-	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx")
+	# Hardware acceleration packages and codecs
+	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx" "gstreamer0.10-plugins-bad" "gstreamer0.10-plugins-base" "gstreamer0.10-plugins-good" "gstreamer0.10-plugins-ugly")
 	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
 	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
 
@@ -130,6 +130,9 @@ collect_xfce() {
 	PKGS=(`collect_x11 $distro`)
 
 	PKGS=("${PKGS[@]}" "xfce4")
+
+	# install a few default apps
+	PKGS=("${PKGS[@]}" "snappy" "abiword" "gnumeric" "xpdf" "xchat")
 
 	echo ${PKGS[@]}
 }
