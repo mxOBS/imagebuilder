@@ -38,7 +38,7 @@ add_repos() {
 		echo "deb http://repo.jm0.eu/BSP:/Cubox-i/Debian_Wheezy/ ./" > $repofile
 		echo "deb-src http://repo.jm0.eu/BSP:/Cubox-i/Debian_Wheezy/ ./" >> $repofile
 		echo "Package: *" > $prefsfile
-		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Debian_Wheezy/" >> $prefsfile
+		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Debian_Wheezy" >> $prefsfile
 		echo "Pin-Priority: 600" >> $prefsfile
 		curl -L http://repo.jm0.eu/BSP:/Cubox-i/Debian_Wheezy/Release.key | chroot_run $buildroot "apt-key add -"
 	fi
@@ -46,7 +46,7 @@ add_repos() {
 		echo "deb http://repo.jm0.eu/BSP:/Cubox-i/Debian_Jessie/ ./" > $repofile
 		echo "deb-src http://repo.jm0.eu/BSP:/Cubox-i/Debian_Jessie/ ./" >> $repofile
 		echo "Package: *" >> $prefsfile
-		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Debian_Jessie/" >> $prefsfile
+		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Debian_Jessie" >> $prefsfile
 		echo "Pin-Priority: 600" >> $prefsfile
 		curl -L http://repo.jm0.eu/BSP:/Cubox-i/Debian_Wheezy/Release.key | chroot_run $buildroot "apt-key add -"
 	fi
@@ -54,7 +54,7 @@ add_repos() {
 		echo "deb http://repo.jm0.eu/BSP:/Cubox-i/Ubuntu_Trusty_Tahr/ ./" > $repofile
 		echo "deb-src http://repo.jm0.eu/BSP:/Cubox-i/Ubuntu_Trusty_Tahr/ ./" >> $repofile
 		echo "Package: *" >> $prefsfile
-		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Ubuntu_Trusty_Tahr/" >> $prefsfile
+		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Ubuntu_Trusty_Tahr" >> $prefsfile
 		echo "Pin-Priority: 600" >> $prefsfile
 		curl -L http://repo.jm0.eu/BSP:/Cubox-i/Debian_Wheezy/Release.key | chroot_run $buildroot "apt-key add -"
 	fi
