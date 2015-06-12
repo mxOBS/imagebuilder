@@ -108,7 +108,7 @@ collect_x11() {
 
 	# Hardware acceleration packages and codecs
 	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx" "gstreamer0.10-plugins-bad" "gstreamer0.10-plugins-base" "gstreamer0.10-plugins-good" "gstreamer0.10-plugins-ugly")
-	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
+	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11" "gstreamer1.0-plugins-base" "gstreamer1.0-plugins-good" "gstreamer1.0-plugins-bad" "gstreamer1.0-plugins-ugly")
 	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-v4-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
 
 	echo ${PKGS[@]}
@@ -119,7 +119,7 @@ collect_mate() {
 
 	PKGS=(`collect_x11 $distro`)
 
-	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman")
+	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman" "xdg-screensaver")
 
 	echo ${PKGS[@]}
 }
