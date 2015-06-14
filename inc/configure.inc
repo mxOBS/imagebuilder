@@ -34,4 +34,26 @@ configure_system() {
 		    -e "s;#autologin-user=;autologin-user=$user;g" \
 		    -i $buildroot/etc/lightdm/lightdm.conf
 	fi
+
+	# set default timezone UTC
+	echo "Etc/UTC" > $buildroot/etc/timezone
+	cp -f $buildroot/usr/share/zoneinfo/Etc/UTC $buildroot/etc/localtime
+	# TODO: update debconf database
+
+	# set default locale
+	sed -i "s;# en_US.UTF-8 UTF-8;en_US.UTF-8 UTF-8;g" $buildroot/etc/locale.gen
+	chroot_run $buildroot "/usr/bin/dpkg-query -s locales-all >/dev/null 2>&1 || locale-gen"
+	chroot_run $buildroot /usr/sbin/update-locale --no-checks LANG
+	chroot_run $buildroot /usr/sbin/update-locale "LANG=en_US.UTF-8"
+	# TODO: update debconf database
+
+	# set default keyboard layout
+	sed \
+		-e "s|^ *XKBMODEL=.*|XKBMODEL=\"pc105\"|" \
+		-e "s|^ *XKBLAYOUT=.*|XKBLAYOUT=\"us\"|" \
+		-e "s|^ *XKBVARIANT=.*|XKBVARIANT=\"intl\"|" \
+		-e "s|^ *XKBOPTIONS=.*|XKBOPTIONS=\"\"|" \
+		-e "s|^ *BACKSPACE=.*|BACKSPACE=\"guess\"|" \
+		-i $buildroot/etc/default/keyboard
+	# TODO update debconf database
 }
