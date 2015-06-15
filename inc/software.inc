@@ -42,7 +42,7 @@ install_base() {
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
 
 	# install useful software for a commandline environment
-	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "locales" "keyboard-configuration" "alsa-utils" "bluez" "command-not-found" "bash-completion" "mediainfo")
+	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "locales" "keyboard-configuration" "alsa-utils" "bluez" "command-not-found" "bash-completion" "mediainfo" "wicd" "wicd-curses")
 
 	# prevent apt from running init-scripts
 	block_services_enable $buildroot
@@ -107,8 +107,8 @@ collect_x11() {
 	PKGS=("${PKGS[@]}" "xserver-xorg-core" "xinit" "lightdm")
 
 	# Hardware acceleration packages and codecs
-	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin" "gpu-viv-bin-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx" "gstreamer0.10-plugins-bad" "gstreamer0.10-plugins-base" "gstreamer0.10-plugins-good" "gstreamer0.10-plugins-ugly")
-	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11" "gstreamer1.0-plugins-base" "gstreamer1.0-plugins-good" "gstreamer1.0-plugins-bad" "gstreamer1.0-plugins-ugly")
+	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin" "gpu-viv-bin-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx" "gstreamer0.10-plugins-bad" "gstreamer0.10-plugins-base" "gstreamer0.10-plugins-good" "gstreamer0.10-plugins-ugly" "mesa-utils")
+	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11" "gstreamer1.0-plugins-base" "gstreamer1.0-plugins-good" "gstreamer1.0-plugins-bad" "gstreamer1.0-plugins-ugly" "mesa-utils" "mesa-utils-extra")
 	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
 
 	echo ${PKGS[@]}
@@ -119,7 +119,7 @@ collect_mate() {
 
 	PKGS=(`collect_x11 $distro`)
 
-	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman" "xdg-screensaver")
+	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman" "xdg-screensaver" "wicd-gtk")
 
 	echo ${PKGS[@]}
 }
@@ -129,7 +129,7 @@ collect_xfce() {
 
 	PKGS=(`collect_x11 $distro`)
 
-	PKGS=("${PKGS[@]}" "xfce4")
+	PKGS=("${PKGS[@]}" "xfce4" "xfce4-terminal" "wicd-gtk")
 
 	# install a few default apps
 	PKGS=("${PKGS[@]}" "snappy" "abiword" "gnumeric" "xpdf" "xchat")

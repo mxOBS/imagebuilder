@@ -42,7 +42,7 @@ configure_system() {
 
 	# set default locale
 	sed -i "s;# en_US.UTF-8 UTF-8;en_US.UTF-8 UTF-8;g" $buildroot/etc/locale.gen
-	chroot_run $buildroot "/usr/bin/dpkg-query -s locales-all >/dev/null 2>&1 || locale-gen"
+	chroot_run $buildroot /usr/sbin/locale-gen
 	chroot_run $buildroot /usr/sbin/update-locale --no-checks LANG
 	chroot_run $buildroot /usr/sbin/update-locale "LANG=en_US.UTF-8"
 	# TODO: update debconf database
