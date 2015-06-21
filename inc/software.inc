@@ -42,7 +42,7 @@ install_base() {
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
 
 	# install useful software for a commandline environment
-	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "locales" "keyboard-configuration" "alsa-utils" "bluez" "command-not-found" "bash-completion" "mediainfo" "wicd" "wicd-curses")
+	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "locales" "keyboard-configuration" "bash-completion" "command-not-found")
 
 	# prevent apt from running init-scripts
 	block_services_enable $buildroot
@@ -59,6 +59,13 @@ install_base() {
 
 	# update command-not-found cache
 	chroot_run $buildroot /usr/sbin/update-command-not-found
+
+	# install additional board support (bluetooth, network daemon, gpu, vpu, utilities
+	PKGS=("alsa-utils" "bluez" "mediainfo" "connman" "connman-curses-git")
+	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-fb" "gpu-viv-bin")
+	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb")
+	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb")
+	chroot_run $buildroot "apt-get -y install ${PKGS[@]}"
 
 	# unblock
 	block_services_disable $buildroot
@@ -119,7 +126,7 @@ collect_mate() {
 
 	PKGS=(`collect_x11 $distro`)
 
-	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman" "xdg-screensaver" "wicd-gtk")
+	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman" "xdg-screensaver" "connman-ui")
 
 	echo ${PKGS[@]}
 }
