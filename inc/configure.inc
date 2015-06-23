@@ -9,13 +9,16 @@ configure_system() {
 	# set hostname in hosts file
 	echo "127.0.0.2 $hostname" >> build/etc/hosts
 
-	# configure network
-	# default: dhcp on eth0
-	echo "auto eth0" >> $buildroot/etc/network/interfaces
-	echo "iface eth0 inet dhcp" >> $buildroot/etc/network/interfaces
-	echo "" >> $buildroot/etc/network/interfaces
-	echo "# To find out how to properly use this file, see the examples at /usr/share/doc/ifupdown/examples/network-interfaces.gz!" >> $buildroot/etc/network/interfaces
-	echo "# gzip -dck /usr/share/doc/ifupdown/examples/network-interfaces.gz | less" >> $buildroot/etc/network/interfaces
+	# ifup/down config file; connman is used, so no configuration done here
+	cat > $buildroot/etc/network/interfaces << EOF
+# interfaces(5) file used by ifup(8) and ifdown(8)
+
+# CONNMAN is installed on this system. Please dont use ifup/down.
+# Instead try connman-curses or connmanctl, which are both preinstalled!
+
+# To find out how to properly use this file, see the examples at /usr/share/doc/ifupdown/examples/network-interfaces.gz!
+# gzip -dck /usr/share/doc/ifupdown/examples/network-interfaces.gz | less
+EOF
 
 	# autogenerate ssh-keys on first boot, and delete the current ones
 	rm -fv $buildroot/etc/ssh/*_key{,.pub}
