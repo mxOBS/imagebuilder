@@ -31,6 +31,7 @@ block_services_disable() {
 # usage: <buildroot>
 install_base() {
 	buildroot=$1
+	distro=$2
 
 	# collect packages to install
 	PKGS=
@@ -136,7 +137,7 @@ collect_xfce() {
 
 	PKGS=(`collect_x11 $distro`)
 
-	PKGS=("${PKGS[@]}" "xfce4" "xfce4-terminal" "wicd-gtk")
+	PKGS=("${PKGS[@]}" "xfce4" "xfce4-terminal" "connman-ui")
 
 	# install a few default apps
 	PKGS=("${PKGS[@]}" "snappy" "abiword" "gnumeric" "xpdf" "xchat")

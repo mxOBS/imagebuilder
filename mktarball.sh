@@ -58,7 +58,7 @@ add_repos build $distro
 restore_aptcache build
 
 # install software selection
-install_base build
+install_base build $distro
 
 install_desktop build $distro $type
 
