@@ -45,7 +45,7 @@ if [ -e build ]; then
 	echo "Warning: build-directory exists already and will be deleted!"
 	echo "This is your chance to cancel. Press enter to procede."
 	read
-	rm -rvf build
+	rm -rf build
 fi
 
 # bootstrap system

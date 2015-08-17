@@ -37,7 +37,7 @@ install_base() {
 	PKGS=
 
 	# required packages for startup
-	PKGS=("${PKGS[@]}" "kernel-cubox-i" "u-boot-cubox-i" "initramfs-tools")
+	PKGS=("${PKGS[@]}" "kernel-3.14.y-fslc-imx6-sr" "u-boot-cubox-i" "initramfs-tools")
 
 	# i.MX6 specific base system
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
@@ -63,27 +63,13 @@ install_base() {
 
 	# install additional board support (bluetooth, network daemon, gpu, vpu, utilities
 	PKGS=("alsa-utils" "bluez" "mediainfo" "connman" "connman-curses-git")
-	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin-fb" "gpu-viv-bin")
+	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv")
 	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb")
 	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb")
 	chroot_run $buildroot "apt-get -y install ${PKGS[@]}"
 
 	# unblock
 	block_services_disable $buildroot
-
-	# create initramfs
-	for kernel in $buildroot/boot/zImage-*; do
-		localversion=`basename $kernel | sed -e "s;^zImage-;;g"`
-		chroot_run $buildroot "/bin/bash /usr/sbin/update-initramfs -c -k $localversion"
-	done
-
-	# create boot symlinks
-	for kernel in $buildroot/boot/zImage-*; do
-		localversion=`basename $kernel | sed -e "s;^zImage-;;g"`
-		ln -sv zImage-$localversion $buildroot/boot/zImage
-		ln -sv initrd.img-$localversion $buildroot/boot/initrd
-		break
-	done
 
 	# add root filesystem to fstab
 	# TODO: move to the part that actually creates the sdcard
@@ -115,7 +101,7 @@ collect_x11() {
 	PKGS=("${PKGS[@]}" "xserver-xorg-core" "xinit" "lightdm")
 
 	# Hardware acceleration packages and codecs
-	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "gpu-viv-bin" "gpu-viv-bin-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx" "gstreamer0.10-plugins-bad" "gstreamer0.10-plugins-base" "gstreamer0.10-plugins-good" "gstreamer0.10-plugins-ugly" "mesa-utils")
+	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer0.10-imx" "gstreamer0.10-plugins-bad" "gstreamer0.10-plugins-base" "gstreamer0.10-plugins-good" "gstreamer0.10-plugins-ugly" "mesa-utils")
 	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11" "gstreamer1.0-plugins-base" "gstreamer1.0-plugins-good" "gstreamer1.0-plugins-bad" "gstreamer1.0-plugins-ugly" "mesa-utils" "mesa-utils-extra")
 	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv" "imx-gpu-viv-x11" "xserver-xorg-video-imx-viv" "gstreamer1.0-imx-x11")
 
