@@ -87,7 +87,7 @@ mount ${LODEV}p1 linux
 
 # install files
 printf "Unpacking rootfs into image: "
-tar -C $MOUNT -xf $archive
+tar -C $MOUNT --numeric-owner -xpf $archive
 test $? != 0 && exit 1
 printf "Done\n"
 

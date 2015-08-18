@@ -9,6 +9,10 @@ configure_system() {
 	# set hostname in hosts file
 	echo "127.0.0.2 $hostname" >> build/etc/hosts
 
+	# spawn getty on serial port
+	echo "# i.MX serial console" >> "$buildroot/etc/inittab"
+	echo "T0:23:respawn:/sbin/getty -L ttymxc0 115200 vt100" >> "$buildroot/etc/inittab"
+
 	# ifup/down config file; connman is used, so no configuration done here
 	cat > $buildroot/etc/network/interfaces << EOF
 # interfaces(5) file used by ifup(8) and ifdown(8)
