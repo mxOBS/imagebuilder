@@ -10,8 +10,14 @@ configure_system() {
 	echo "127.0.0.2 $hostname" >> build/etc/hosts
 
 	# spawn getty on serial port
-	echo "# i.MX serial console" >> "$buildroot/etc/inittab"
-	echo "T0:23:respawn:/sbin/getty -L ttymxc0 115200 vt100" >> "$buildroot/etc/inittab"
+	if [ -e "$buildroot/etc/inittab" ]; then
+		#sysvinit
+		echo "# i.MX serial console" >> "$buildroot/etc/inittab"
+		echo "T0:23:respawn:/sbin/getty -L ttymxc0 115200 vt100" >> "$buildroot/etc/inittab"
+	else
+		# systemd
+		chroot_run $buildroot systemctl enable serial-getty@ttymxc0.service
+	fi
 
 	# ifup/down config file; connman is used, so no configuration done here
 	cat > $buildroot/etc/network/interfaces << EOF

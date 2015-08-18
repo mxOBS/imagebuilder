@@ -72,6 +72,7 @@ configure_system build
 cleanup_system build
 
 # make tarball
+rm -f $distro.tar
 pushd build; tar -cf ../$distro.tar *; popd
 
 echo "Finished creating $distro.tar!"
