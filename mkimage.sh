@@ -14,7 +14,7 @@ if [ "$UID" != 0 ]; then
 	exit 1
 fi
 
-progs="dd losetup fdisk tar mkfs.ext4"
+progs="dd losetup fdisk tar mkfs.ext4 qemu-img"
 for prog in $progs; do
 	which $prog 1>/dev/null 2>/dev/null
 	if [ $? != 0 ]; then
@@ -46,9 +46,8 @@ trap cleanup INT TERM EXIT
 
 # create image file
 IMG=`basename $archive .tar`.img
-count=`echo $size/4 | bc`
-printf "Creating %s with a size of %sM: " $IMG $size
-dd if=/dev/zero of="$IMG" bs=4M count=$count 1>/dev/null 2>/dev/null
+printf "Creating %s with a size of %s: " $IMG $size
+qemu-img create "$IMG" $size 1>/dev/null
 printf "Done\n"
 
 # attach image to loopback device
