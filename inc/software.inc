@@ -76,7 +76,8 @@ install_base() {
 	echo "/dev/mmcblk0p1 / ext4 defaults 0 0" >> $buildroot/etc/fstab
 
 	# create uEnv.txt
-	echo "mmcroot=/dev/mmcblk0p1 rootwait rw" > $buildroot/boot/uEnv.txt
+	echo 'mmcroot=/dev/mmcblk0p1 rootwait rw' > $buildroot/boot/uEnv.txt
+	echo 'mmcargs=setenv bootargs console=ttymxc0,115200n8 console=tty root=${mmcroot} quiet' >> $buildroot/boot/uEnv.txt
 
 	# resize FS on first boot
 	cat > $buildroot/etc/runonce.d/expand-fs.sh << EOF
