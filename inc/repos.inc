@@ -48,15 +48,15 @@ add_repos() {
 		echo "Package: *" >> $prefsfile
 		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Debian_Jessie" >> $prefsfile
 		echo "Pin-Priority: 600" >> $prefsfile
-		curl -L http://repo.jm0.eu/BSP:/IMX6/Debian_Wheezy/Release.key | chroot_run $buildroot "apt-key add -"
+		curl -L http://repo.jm0.eu/BSP:/IMX6/Debian_Jessie/Release.key | chroot_run $buildroot "apt-key add -"
 	fi
 	if [ "$distro" = "trusty" ]; then
-		echo "deb http://repo.jm0.eu/BSP:/IMX6/Ubuntu_Trusty_Tahr/ ./" > $repofile
-		echo "deb-src http://repo.jm0.eu/BSP:/IMX6/Ubuntu_Trusty_Tahr/ ./" >> $repofile
+		echo "deb http://repo.jm0.eu/BSP:/IMX6/Ubuntu_Trusty/ ./" > $repofile
+		echo "deb-src http://repo.jm0.eu/BSP:/IMX6/Ubuntu_Trusty/ ./" >> $repofile
 		echo "Package: *" >> $prefsfile
-		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Ubuntu_Trusty_Tahr" >> $prefsfile
+		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Ubuntu_Trusty" >> $prefsfile
 		echo "Pin-Priority: 600" >> $prefsfile
-		curl -L http://repo.jm0.eu/BSP:/IMX6/Debian_Wheezy/Release.key | chroot_run $buildroot "apt-key add -"
+		curl -L http://repo.jm0.eu/BSP:/IMX6/Ubuntu_Trusty/Release.key | chroot_run $buildroot "apt-key add -"
 	fi
 
 	# refresh apt cache
