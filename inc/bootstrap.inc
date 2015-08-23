@@ -17,15 +17,15 @@ bootstrap_system() {
 
 	# create tarball of packages if it doesnt exist yet
 	if [ ! -e $distro.bootstrap.tar ]; then
-		debootstrap --no-check-gpg --arch=armhf --make-tarball=$PWD/$distro.bootstrap.tar $distro build $mirror
+		debootstrap --no-check-gpg --arch=armhf --make-tarball=$PWD/$distro.bootstrap.tar $distro $buildroot $mirror
 	fi
 
 	# on foreign architectures, run second stage manually
 	if [[ `uname -m` = arm* ]]; then
-		debootstrap --no-check-gpg --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $distro build $mirror
+		debootstrap --no-check-gpg --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $distro $buildroot $mirror
 	else
 		# first stage
-		debootstrap --no-check-gpg --foreign --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $distro build $mirror
+		debootstrap --no-check-gpg --foreign --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $distro $buildroot $mirror
 
 		# second stage in chroot
 		chroot_run $buildroot "/bin/bash /debootstrap/debootstrap --second-stage"

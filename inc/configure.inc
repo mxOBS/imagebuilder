@@ -5,9 +5,9 @@ configure_system() {
 	# set hostname
 	hostname=linux
 	# debootstrap set the current systems hostname, replace it
-	sudo sed -i "s;$HOSTNAME;$hostname;g" build/etc/{hostname,ssh/*.pub}
+	sudo sed -i "s;$HOSTNAME;$hostname;g" $buildroot/etc/{hostname,ssh/*.pub}
 	# set hostname in hosts file
-	echo "127.0.0.2 $hostname" >> build/etc/hosts
+	echo "127.0.0.2 $hostname" >> $buildroot/etc/hosts
 
 	# spawn getty on serial port
 	if [ -e "$buildroot/etc/inittab" ]; then

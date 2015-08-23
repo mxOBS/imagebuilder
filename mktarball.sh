@@ -41,38 +41,39 @@ if [ $? != 0 ]; then
 	exit 1
 fi
 
-if [ -e build ]; then
+buildroot=build-$distro-$type
+if [ -e $buildroot ]; then
 	echo "Warning: build-directory exists already and will be deleted!"
 	echo "This is your chance to cancel. Press enter to procede."
 	read
-	rm -rf build
+	rm -rf $buildroot
 fi
 
 # bootstrap system
-bootstrap_system build $distro
+bootstrap_system $buildroot $distro
 
 # add repos
-add_repos build $distro
+add_repos $buildroot $distro
 
 # restore apt cache from previous runs
-restore_aptcache build
+restore_aptcache $buildroot
 
 # install software selection
-install_base build $distro
+install_base $buildroot $distro
 
-install_desktop build $distro $type
+install_desktop $buildroot $distro $type
 
 # save apt cache for later use
-save_aptcache build
+save_aptcache $buildroot
 
 # configure system
-configure_system build
+configure_system $buildroot
 
 # remove traces of build-system
-cleanup_system build
+cleanup_system $buildroot
 
 # make tarball
 rm -f $distro.tar
-pushd build; tar -cf ../$distro.tar *; popd
+pushd $buildroot; tar -cf ../$distro.tar *; popd
 
 echo "Finished creating $distro.tar!"
