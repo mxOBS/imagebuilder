@@ -64,8 +64,8 @@ install_base() {
 	# install additional board support (bluetooth, network daemon, gpu, vpu, utilities
 	PKGS=("alsa-utils" "bluez" "mediainfo" "connman" "connman-curses-git")
 	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv")
-	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb")
-	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb" "gstreamer1.0-plugins-good" "gstreamer1.0-plugins-bad" "gstreamer1.0-plugins-ugly")
+	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb" "gstreamer1.0-plugins-good" "gstreamer1.0-plugins-bad" "gstreamer1.0-plugins-ugly")
+	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb" "gstreamer1.0-plugins-good")
 	chroot_run $buildroot "apt-get -y install ${PKGS[@]}"
 
 	# unblock
