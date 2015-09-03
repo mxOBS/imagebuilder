@@ -15,9 +15,14 @@ configure_system() {
 		echo "# i.MX serial console" >> "$buildroot/etc/inittab"
 		echo "T0:23:respawn:/sbin/getty -L ttymxc0 115200 vt100" >> "$buildroot/etc/inittab"
 	else
+	if [ -e "$buildroot/bin/systemctl" ] || [ -e "$buildroot/usr/bin/systemctl" ]; then
 		# systemd
 		chroot_run $buildroot systemctl enable serial-getty@ttymxc0.service
-	fi
+	else
+	if [ -d "$buildroot/etc/init" ]; then
+		# upstart
+		echo "NOPE"
+	fi; fi; fi
 
 	# ifup/down config file; connman is used, so no configuration done here
 	cat > $buildroot/etc/network/interfaces << EOF
@@ -69,4 +74,7 @@ EOF
 		-e "s|^ *BACKSPACE=.*|BACKSPACE=\"guess\"|" \
 		-i $buildroot/etc/default/keyboard
 	# TODO update debconf database
+
+	# HACK: set sticky-bit on ping and ping6
+	chroot_run $buildroot chmod +s /bin/ping /bin/ping6
 }

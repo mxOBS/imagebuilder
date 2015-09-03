@@ -28,8 +28,8 @@ function qemu_remove() {
 			return
 		fi
 		if [ -e /usr/bin/qemu-arm-binfmt ] && [ -e /usr/bin/qemu-arm ]; then
-			rm $buildroot/usr/bin/qemu-arm-binfmt
-			rm $buildroot/usr/bin/qemu-arm
+#			rm $buildroot/usr/bin/qemu-arm-binfmt
+#			rm $buildroot/usr/bin/qemu-arm
 			return
 		fi
 	fi

@@ -34,7 +34,7 @@ install_base() {
 	distro=$2
 
 	# collect packages to install
-	PKGS=
+	unset PKGS
 
 	# required packages for startup
 	PKGS=("${PKGS[@]}" "kernel-3.14.y-fslc-imx6-sr" "u-boot-cubox-i" "initramfs-tools")
@@ -62,10 +62,10 @@ install_base() {
 	chroot_run $buildroot /usr/sbin/update-command-not-found
 
 	# install additional board support (bluetooth, network daemon, gpu, vpu, utilities
-	PKGS=("alsa-utils" "bluez" "mediainfo" "connman" "connman-curses-git")
+	PKGS=("alsa-utils" "bluez" "mediainfo" "connman" "connman-curses-git" "rfkill")
 	[ "$distro" = "wheezy" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv")
-	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb" "gstreamer1.0-plugins-good" "gstreamer1.0-plugins-bad" "gstreamer1.0-plugins-ugly")
-	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-imx-fb" "gstreamer1.0-plugins-good")
+	[ "$distro" = "jessie" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-tools" "gstreamer1.0-imx-fb" "gstreamer1.0-plugins-good" "gstreamer1.0-plugins-bad" "gstreamer1.0-plugins-ugly")
+	[ "$distro" = "trusty" ] && PKGS=("${PKGS[@]}" "imx-gpu-viv-fb" "imx-gpu-viv" "gstreamer1.0-tools" "gstreamer1.0-imx-fb" "gstreamer1.0-plugins-good")
 	chroot_run $buildroot "apt-get -y install ${PKGS[@]}"
 
 	# unblock
@@ -96,7 +96,7 @@ collect_x11() {
 	distro=$1
 
 	# collect packages
-	PKGS=
+	unset PKGS
 
 	# core Xorg
 	PKGS=("${PKGS[@]}" "xserver-xorg-core" "xinit" "lightdm")
@@ -114,7 +114,7 @@ collect_mate() {
 
 	PKGS=(`collect_x11 $distro`)
 
-	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman" "xdg-screensaver" "connman-ui")
+	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman" "connman-ui")
 
 	echo ${PKGS[@]}
 }
@@ -142,7 +142,7 @@ install_desktop() {
 	[ "$type" = "cli" ] && return 0
 
 	# collect packages
-	PKGS=
+	unset PKGS
 	[ "$type" = "mate" ] && PKGS=("${PKGS[@]}" "`collect_mate $distro`")
 	[ "$type" = "xfce" ] && PKGS=("${PKGS[@]}" "`collect_xfce $distro`")
 
@@ -153,6 +153,8 @@ install_desktop() {
 
 	# install packages
 	block_services_enable $buildroot
+	# HACK
+	chroot_run $buildroot "apt-get -y remove gstreamer1.0-imx-fb"
 	chroot_run $buildroot "apt-get -y install ${PKGS[@]}"
 	block_services_disable $buildroot
 }
