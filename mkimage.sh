@@ -45,7 +45,7 @@ function cleanup() {
 trap cleanup INT TERM EXIT
 
 # create image file
-IMG=`basename $archive .tar`.img
+IMG=$(echo $archive | cut -d. -f1).img
 printf "Creating %s with a size of %s: " $IMG $size
 qemu-img create "$IMG" $size 1>/dev/null
 printf "Done\n"
