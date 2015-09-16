@@ -73,7 +73,7 @@ install_base() {
 
 	# add root filesystem to fstab
 	# TODO: move to the part that actually creates the sdcard
-	echo "/dev/mmcblk0p1 / ext4 defaults 0 0" >> $buildroot/etc/fstab
+	echo "/dev/root / ext4 defaults 0 0" >> $buildroot/etc/fstab
 
 	# create uEnv.txt
 	echo 'mmcroot=/dev/mmcblk0p1 rootwait rw' > $buildroot/boot/uEnv.txt
