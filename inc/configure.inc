@@ -40,8 +40,8 @@ EOF
 	chroot_run $buildroot runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reconfigure openssh-server
 
 	# create default user
-	user=solidrun
-	password=solidrun
+	user=debian
+	password=debian
 	groups="sudo,audio,video"
 	password_encrypted=`perl -e 'print crypt($ARGV[0], "password")' $password`
 	chroot_run $buildroot useradd -G $groups -m -U -s /bin/bash -p $password_encrypted $user
