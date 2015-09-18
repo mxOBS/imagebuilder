@@ -48,6 +48,7 @@ download() {
 	url="$1"
 
 	curl -k "$url" --progress
+	return $?
 }
 
 decompress() {
@@ -56,16 +57,16 @@ decompress() {
 	if [[ $url = *.img ]]; then
 		# nothing to do, just forward
 		cat
-		return
+		return $?
 	fi
 	if [[ $url = *.xz ]]; then
 		# unxz
 		xz -d
-		return
+		return $?
 	fi
 	if [[ $url = *.gz ]]; then
 		gzip -d
-		return
+		return $?
 	fi
 }
 
@@ -73,10 +74,18 @@ write() {
 	disk="$1"
 
 	dd of="$disk" bs=4M conv=fsync
+	return $?
 }
+
+# configure busybox so pipes fail if either element fails
+set -o pipefail
 
 # download, decompress and write
 download "$url" | decompress "$url" | write "$disk"
+ret=$?
+if [ $ret != 0 ]; then
+	exit $ret
+fi
 
 # clear trap
 trap - 0
