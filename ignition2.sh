@@ -54,11 +54,7 @@ download() {
 decompress() {
 	url="$1"
 
-	if [[ $url = *.img ]]; then
-		# nothing to do, just forward
-		cat
-		return $?
-	fi
+	# detect compression, if any
 	if [[ $url = *.xz ]]; then
 		# unxz
 		xz -d
@@ -68,6 +64,10 @@ decompress() {
 		gzip -d
 		return $?
 	fi
+
+	# no compression detected, just forward the data without modification
+	cat
+	return $?
 }
 
 write() {
