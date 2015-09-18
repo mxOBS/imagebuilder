@@ -72,7 +72,7 @@ decompress() {
 write() {
 	disk="$1"
 
-	dd of="$disk" bs=4M iflag=fullblock oflag=sync
+	dd of="$disk" bs=4M conv=fsync
 }
 
 # download, decompress and write
