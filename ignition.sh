@@ -16,7 +16,7 @@ if [ "x$UID" != "x0" ]; then
 	exit 1
 fi
 
-# cleanup on unexpectd exit
+# cleanup on unexpected exit
 cleanup() {
 	if [ -d "mnt" ]; then
 		umount mnt || true
