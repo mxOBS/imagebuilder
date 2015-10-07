@@ -65,7 +65,7 @@ install_base() {
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
 
 	# install useful software for a commandline environment
-	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ca-certificates" "ntp" "fbset" "locales" "keyboard-configuration" "bash-completion" "command-not-found")
+	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ntp" "fbset" "locales" "keyboard-configuration" "bash-completion" "command-not-found")
 
 	# prevent apt from running init-scripts
 	block_services_enable $buildroot
@@ -99,7 +99,7 @@ install_base() {
 
 	# create uEnv.txt
 	echo 'mmcroot=/dev/mmcblk0p1 rootwait rw' > $buildroot/boot/uEnv.txt
-	echo 'mmcargs=setenv bootargs console=ttymxc0,115200n8 console=tty ar803x_smarteee root=${mmcroot} quiet' >> $buildroot/boot/uEnv.txt
+	echo 'mmcargs=setenv bootargs console=ttymxc0,115200n8 console=tty root=${mmcroot} quiet' >> $buildroot/boot/uEnv.txt
 
 	# resize FS on first boot
 	cat > $buildroot/etc/runonce.d/expand-fs.sh << EOF
