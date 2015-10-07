@@ -44,10 +44,10 @@ bootstrap_system() {
 
 	# on foreign architectures, run second stage manually
 	if [[ `uname -m` = arm* ]]; then
-		debootstrap --no-check-gpg --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $distro $buildroot $mirror
+		debootstrap --no-check-gpg --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar --include=apt-transport-https,ca-certificates $distro $buildroot $mirror
 	else
 		# first stage
-		debootstrap --no-check-gpg --foreign --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $distro $buildroot $mirror
+		debootstrap --no-check-gpg --foreign --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar --include=apt-transport-https,ca-certificates $distro $buildroot $mirror
 
 		# second stage in chroot
 		chroot_run $buildroot "/bin/bash /debootstrap/debootstrap --second-stage"

@@ -57,28 +57,28 @@ add_repos() {
 	repofile=$buildroot/etc/apt/sources.list.d/imx6.list
 	prefsfile=$buildroot/etc/apt/preferences.d/imx6
 	if [ "$distro" = "wheezy" ]; then
-		echo "deb http://repo.jm0.eu/BSP:/IMX6/Debian_Wheezy/ ./" > $repofile
-		echo "deb-src http://repo.jm0.eu/BSP:/IMX6/Debian_Wheezy/ ./" >> $repofile
+		echo "deb https://repo.solid-build.xyz/debian/wheezy/bsp-imx6// ./" > $repofile
+		echo "deb-src https://repo.solid-build.xyz/debian/wheezy/bsp-imx6// ./" >> $repofile
 		echo "Package: *" > $prefsfile
 		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Debian_Wheezy" >> $prefsfile
 		echo "Pin-Priority: 600" >> $prefsfile
-		curl -L http://repo.jm0.eu/BSP:/IMX6/Debian_Wheezy/Release.key | chroot_run $buildroot "apt-key add -"
+		curl -L https://repo.solid-build.xyz/debian/wheezy/bsp-imx6//Release.key | chroot_run $buildroot "apt-key add -"
 	fi
 	if [ "$distro" = "jessie" ]; then
-		echo "deb http://repo.jm0.eu/BSP:/IMX6/Debian_Jessie/ ./" > $repofile
-		echo "deb-src http://repo.jm0.eu/BSP:/IMX6/Debian_Jessie/ ./" >> $repofile
+		echo "deb https://repo.solid-build.xyz/debian/jessie/bsp-imx6// ./" > $repofile
+		echo "deb-src https://repo.solid-build.xyz/debian/jessie/bsp-imx6// ./" >> $repofile
 		echo "Package: *" >> $prefsfile
 		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Debian_Jessie" >> $prefsfile
 		echo "Pin-Priority: 600" >> $prefsfile
-		curl -L http://repo.jm0.eu/BSP:/IMX6/Debian_Jessie/Release.key | chroot_run $buildroot "apt-key add -"
+		curl -L https://repo.solid-build.xyz/debian/jessie/bsp-imx6//Release.key | chroot_run $buildroot "apt-key add -"
 	fi
 	if [ "$distro" = "trusty" ]; then
-		echo "deb http://repo.jm0.eu/BSP:/IMX6/Ubuntu_Trusty/ ./" > $repofile
-		echo "deb-src http://repo.jm0.eu/BSP:/IMX6/Ubuntu_Trusty/ ./" >> $repofile
+		echo "deb https://repo.solid-build.xyz/obs/BSP:/IMX6/Ubuntu_Trusty/ ./" > $repofile
+		echo "deb-src https://repo.solid-build.xyz/obs/BSP:/IMX6/Ubuntu_Trusty/ ./" >> $repofile
 		echo "Package: *" >> $prefsfile
 		echo "Pin: release o=obs://mx6bs/BSP:Cubox-i/Ubuntu_Trusty" >> $prefsfile
 		echo "Pin-Priority: 600" >> $prefsfile
-		curl -L http://repo.jm0.eu/BSP:/IMX6/Ubuntu_Trusty/Release.key | chroot_run $buildroot "apt-key add -"
+		curl -L https://repo.solid-build.xyz/obs/BSP:/IMX6/Ubuntu_Trusty/Release.key | chroot_run $buildroot "apt-key add -"
 	fi
 
 	# refresh apt cache
