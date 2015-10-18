@@ -65,7 +65,8 @@ install_base() {
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
 
 	# install useful software for a commandline environment
-	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ntp" "fbset" "locales" "keyboard-configuration" "bash-completion" "command-not-found" "usbutils" "pciutils" "i2c-tools" "cpufrequtils" "rng-tools")
+	PKGS=("${PKGS[@]}" "openssh-server" "e2fsprogs" "sudo" "fbset" "locales" "keyboard-configuration" "bash-completion" "command-not-found" "usbutils" "pciutils" "i2c-tools" "cpufrequtils" "rng-tools")
+	[ "$distro" != "jessie" ] && PKGS=("${PKGS[@]}" "ntp")
 
 	# prevent apt from running init-scripts
 	block_services_enable $buildroot
@@ -115,6 +116,9 @@ EOF
 
 	# default to multi-user CLI target
 	chroot_run $buildroot systemctl set-default -f multi-user.target
+
+	# enable systemd time synchronization
+	[ "$distro" = "jessie" ] && chroot_run $buildroot systemctl enable systemd-timesyncd.service
 }
 
 collect_x11() {
