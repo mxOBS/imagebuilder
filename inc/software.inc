@@ -112,6 +112,9 @@ if [ \$s = 2 ]; then
 fi
 exit \$s
 EOF
+
+	# default to multi-user CLI target
+	chroot_run $buildroot systemctl set-default -f multi-user.target
 }
 
 collect_x11() {
@@ -179,4 +182,7 @@ install_desktop() {
 	chroot_run $buildroot "apt-get -y remove gstreamer1.0-imx-fb"
 	chroot_run $buildroot "apt-get -y install ${PKGS[@]}"
 	block_services_disable $buildroot
+
+	# set boot target to graphical desktop
+	chroot_run $buildroot systemctl set-default graphical.target
 }
