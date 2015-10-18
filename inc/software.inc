@@ -65,7 +65,7 @@ install_base() {
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
 
 	# install useful software for a commandline environment
-	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ntp" "fbset" "locales" "keyboard-configuration" "bash-completion" "command-not-found")
+	PKGS=("${PKGS[@]}" "openssh-server" "sudo" "ntp" "fbset" "locales" "keyboard-configuration" "bash-completion" "command-not-found" "usbutils" "pciutils" "i2c-tools" "cpufrequtils" "rng-tools")
 
 	# prevent apt from running init-scripts
 	block_services_enable $buildroot
