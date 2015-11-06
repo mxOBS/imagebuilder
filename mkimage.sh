@@ -113,8 +113,44 @@ printf "Done\n"
 
 # install u-boot
 printf "Installing bootloader: "
-dd if=$MOUNT/boot/cubox-i-spl.bin of=$LODEV bs=1K seek=1 1>/dev/null 2>/dev/null
-dd if=$MOUNT/boot/u-boot.img of=$LODEV bs=1K seek=42 1>/dev/null 2>/dev/null
+if [ -e $MOUNT/boot/cubox-i-spl.bin ] && [ -e $MOUNT/boot/u-boot.img ]; then
+	dd if=$MOUNT/boot/cubox-i-spl.bin of=$LODEV bs=1K seek=1 1>/dev/null 2>/dev/null
+	dd if=$MOUNT/boot/u-boot.img of=$LODEV bs=1K seek=42 1>/dev/null 2>/dev/null
+fi
+if [ -e $MOUNT/boot/u-boot-clearfog.mmc ]; then
+	dd if=$MOUNT/boot/u-boot-clearfog.mmc of=$LODEV bs=512 seek=1 1>/dev/null 2>/dev/null
+	cat > $MOUNT/boot.script << EOF
+# configure bootargs
+setenv bootargs 'root=/dev/mmcblk0p1 rootfstype=ext4 rootwait rw console=ttyS0,115200n8'
+
+# configure addresses
+kerneladdr=0x2000000
+fdtaddr=0x5F00000
+ramdiskaddr=0x6000000
+
+# load DTB
+echo "Loading armada-388-clearfog.dtb"
+ext4load mmc 0:1 \${fdtaddr} /boot/armada-388-clearfog.dtb
+
+# load Kernel
+echo "Loading zImage ..."
+ext4load mmc 0:1 \${kerneladdr} /boot/zImage
+
+# load Ramdisk
+echo "Loading initrd ..."
+ext4load mmc 0:1 \${ramdiskaddr} /boot/initrd
+ramdisksize=0x${filesize}
+
+# Sleep a while so the MMC driver can settle down
+echo "Sleeping 5 seconds ..."
+sleep 5
+
+# boot
+echo "Booting ..."
+bootz \${kerneladdr} \${ramdiskaddr}:\${ramdisksize} \${fdtaddr}
+EOF
+	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $MOUNT/boot.script $MOUNT/boot.scr 1>/dev/null 2>/dev/null
+fi
 printf "Done\n"
 
 # flush caches

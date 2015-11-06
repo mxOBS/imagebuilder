@@ -1,4 +1,3 @@
-#!/bin/bash -e
 # 
 # Copyright (c) 2015 Josua Mayer
 # 
@@ -19,73 +18,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-# 
+#
 
-usage() {
-	echo "$0 <disk> <URL>"
-	exit 1
+# usage: <buildroot> <name> <url> <suffix>
+addrepo() {
+	buildroot="$1"
+	name="$2"
+	url="$3"
+	shift 3
+	suffix="$*"
+
+	repofile="$buildroot/etc/apt/$name"
+	touch $repofile
+	echo "deb $url $suffix" >> $repofile
+	echo "deb-src $url $suffix" >> $repofile
 }
 
-if [ "x$#" != "x2" ]; then
-	usage
-fi
-disk="$1"
-url="$2"
-
-if [ "x$UID" != "x0" ]; then
-	echo "Error: This script requires root privileges!"
-	exit 1
-fi
-
-# unexpected exit hook
-cleanup() {
-	echo "An unknown error occured!"
-	exit 1
-}
-trap cleanup 0
-
-download() {
-	url="$1"
-
-	curl -k "$url" --progress
-	return $?
-}
-
-decompress() {
-	url="$1"
-
-	# detect compression, if any
-	if [[ $url = *.xz ]]; then
-		# unxz
-		xz -d
-		return $?
-	fi
-	if [[ $url = *.gz ]]; then
-		gzip -d
-		return $?
-	fi
-
-	# no compression detected, just forward the data without modification
-	cat
-	return $?
-}
-
-write() {
-	disk="$1"
-
-	dd of="$disk" bs=4M conv=fsync
-	return $?
-}
-
-# configure busybox so pipes fail if either element fails
-set -o pipefail
-
-# download, decompress and write
-download "$url" | decompress "$url" | write "$disk"
-ret=$?
-if [ $ret != 0 ]; then
-	exit $ret
-fi
-
-# clear trap
-trap - 0
+# define required programs
+dependencies="touch"

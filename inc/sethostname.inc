@@ -20,19 +20,15 @@
 # THE SOFTWARE.
 #
 
-# usage: <buildroot>
-cleanup() {
+# usage: <buildroot> <hostname>
+sethostname() {
 	buildroot="$1"
+	hostname=$2
 
-	# save apt package cache
-	aptcache_store "$buildroot"
+	# debootstrap used the current systems hostname, replace it
+	sudo sed -i "s;$HOSTNAME;$hostname;g" "$buildroot"/etc/ssh/*.pub
+	echo "$hostname" > "$buildroot/etc/hostname"
 
-	# clean apt package store
-	chroot_run $buildroot "apt-get clean"
-
-	# remove resolv.conf of host system
-	rm -vf $buildroot/etc/resolv.conf
+	# add entry in hosts file too
+	echo "127.0.0.2 $hostname" >> "$buildroot/etc/hosts"
 }
-
-# define required programs
-dependencies="rm"

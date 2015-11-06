@@ -21,31 +21,20 @@
 # THE SOFTWARE.
 # 
 
-# load all modules
-for m in inc/*.inc; do
-	source $m
-done
-
 # check arguments
 usage() {
-	echo "Usage: $0 <distro-codename> <image-type>"
-	echo "distro-codename: [wheezy,jessie,trusty]"
-	echo "image-type: [cli,xfce,mate]"
+	echo "Usage: $0 <configuration>"
+	echo "configuration: [configs/*]"
 }
-if [ $# != 2 ]; then
+if [ $# != 1 ]; then
 	usage
 	exit 1
 fi
 
-distro=$1
-if [ "$distro" != "wheezy" ] && [ "$distro" != "jessie" ] && [ "$distro" != "trusty" ]; then
-	usage
-	exit 1
-fi
-
-type=$2
-if [ "$type" != "cli" ] && [ "$type" != "mate" ] && [ "$type" != "xfce" ]; then
-	usage
+# see if config file exists
+configfile="$1"
+if [ ! -e "$configfile" ]; then
+	echo "Error: $configfile does not exist!"
 	exit 1
 fi
 
@@ -56,45 +45,37 @@ if [ "x$UID" != "x0" ]; then
 	exit 1
 fi
 
-which debootstrap 1>/dev/null 2>/dev/null
-if [ $? != 0 ]; then
-	echo "Error: debootstrap is not installed!"
-	exit 1
-fi
+# load all modules
+for m in inc/*.inc; do
+	dependencies=""
+	# load each module
+	source $m
 
-buildroot=build-$distro-$type
-if [ -e $buildroot ]; then
+	# and check its dependencies
+	[ -z "$dependencies" ] && for dep in $dependencies; do
+		which $program 1>/dev/null 2>/dev/null
+		if [ $? != 0 ]; then
+			echo "Error: $program required but not found!"
+			exit 1
+		fi
+	done
+done
+
+# choose build directory name
+buildroot="build-$(basename "$configfile" .inc)"
+if [ -e "$buildroot" ]; then
 	echo "Warning: build-directory exists already and will be deleted!"
 	echo "This is your chance to cancel. Press enter to procede."
 	read
 	rm -rf $buildroot
 fi
 
-# bootstrap system
-bootstrap_system $buildroot $distro
-
-# add repos
-add_repos $buildroot $distro
-
-# restore apt cache from previous runs
-restore_aptcache $buildroot
-
-# install software selection
-install_base $buildroot $distro
-
-install_desktop $buildroot $distro $type
-
-# save apt cache for later use
-save_aptcache $buildroot
-
-# configure system
-configure_system $buildroot
-
-# remove traces of build-system
-cleanup_system $buildroot
+# perform build
+source "$configfile"
 
 # make tarball
-rm -f $distro.tar
-pushd $buildroot; tar -cf ../$distro.tar *; popd
+tarballname="$(basename "$configfile" .inc)"
+rm -f "$tarballname.tar"
+pushd "$buildroot"; tar -cf "../$tarballname.tar" *; popd
 
-echo "Finished creating $distro.tar!"
+echo "Finished creating $tarballname.tar!"

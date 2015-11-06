@@ -18,12 +18,14 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-# 
+#
 
-# usage: <buildroot> <distro-codename>
-bootstrap_system() {
+# usage: <buildroot> <distro-codename> <packages>
+bootstrap() {
 	buildroot=$1
 	distro=$2
+	shift 2
+	packages="$(echo $* | sed -e "s; ;,;g")"
 
 	# select distribution-specific settings
 	mirror=
@@ -39,15 +41,15 @@ bootstrap_system() {
 
 	# create tarball of packages if it doesnt exist yet
 	if [ ! -e $distro.bootstrap.tar ]; then
-		debootstrap --no-check-gpg --arch=armhf --make-tarball=$PWD/$distro.bootstrap.tar $distro $buildroot $mirror
+		debootstrap --no-check-gpg --arch=armhf --include="$packages" --make-tarball=$PWD/$distro.bootstrap.tar $distro $buildroot $mirror
 	fi
 
 	# on foreign architectures, run second stage manually
 	if [[ `uname -m` = arm* ]]; then
-		debootstrap --no-check-gpg --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar --include=apt-transport-https,ca-certificates $distro $buildroot $mirror
+		debootstrap --no-check-gpg --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar --include="$packages" $distro $buildroot $mirror
 	else
 		# first stage
-		debootstrap --no-check-gpg --foreign --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar --include=apt-transport-https,ca-certificates $distro $buildroot $mirror
+		debootstrap --no-check-gpg --foreign --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar --include="$packages" $distro $buildroot $mirror
 
 		# second stage in chroot
 		chroot_run $buildroot "/bin/bash /debootstrap/debootstrap --second-stage"
@@ -56,4 +58,19 @@ bootstrap_system() {
 		# copy resolv.conf
 		cp /etc/resolv.conf $buildroot/etc/
 	fi
+
+	# apply permission hacks
+	chmod +s "$buildroot/bin/ping" "$buildroot/bin/ping6"
+
+	# restore previous apt cache if any
+	aptcache_restore "$buildroot"
+
+	# set default locale
+	sed -i "s;# en_US.UTF-8 UTF-8;en_US.UTF-8 UTF-8;g" $buildroot/etc/locale.gen
+	chroot_run $buildroot /usr/sbin/locale-gen
+	chroot_run $buildroot /usr/sbin/update-locale --no-checks LANG
+	chroot_run $buildroot /usr/sbin/update-locale "LANG=en_US.UTF-8"
 }
+
+# define required programs
+dependencies="debootstrap cp"

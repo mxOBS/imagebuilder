@@ -20,19 +20,26 @@
 # THE SOFTWARE.
 #
 
-# usage: <buildroot>
-cleanup() {
+# usage: <buildroot> <key>
+addaptkey() {
 	buildroot="$1"
+	uri="$2"
 
-	# save apt package cache
-	aptcache_store "$buildroot"
+	# see if key is a local file and exists
+	if [ -e "$uri" ]; then
+		# looks good, copy into buildroot
+		cp -v "$uri" "$buildroot/root/repo.key"
+	else
+		# hopefully uri is an URL that curl can read
+		curl -k -o "$buildroot/root/repo.key" "$uri"
+	fi
 
-	# clean apt package store
-	chroot_run $buildroot "apt-get clean"
+	# actually import the key
+	chroot_run "$buildroot" apt-key add /root/repo.key
 
-	# remove resolv.conf of host system
-	rm -vf $buildroot/etc/resolv.conf
+	# delete keyfile
+	rm -f "$buildroot/root/repo.key"
 }
 
 # define required programs
-dependencies="rm"
+dependencies="cp curl rm"

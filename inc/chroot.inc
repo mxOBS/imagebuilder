@@ -18,7 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-# 
+#
 
 # usage: <buildroot> <cmd>
 chroot_run() {
@@ -31,3 +31,6 @@ chroot_run() {
 	chroot "$buildroot" $cmd
 	qemu_remove $buildroot
 }
+
+# define required programs
+dependencies="chroot"

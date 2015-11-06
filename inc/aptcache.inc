@@ -18,21 +18,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-#
+# 
 
 # usage: <buildroot>
-cleanup() {
+aptcache_restore() {
 	buildroot="$1"
 
-	# save apt package cache
-	aptcache_store "$buildroot"
-
-	# clean apt package store
-	chroot_run $buildroot "apt-get clean"
-
-	# remove resolv.conf of host system
-	rm -vf $buildroot/etc/resolv.conf
+	tarballname="aptcache.$buildroot.tar"
+	if [ -e "$tarballname" ]; then
+		tar -C "$buildroot" -xf "$tarballname"
+	fi
 }
 
-# define required programs
-dependencies="rm"
+# usage: <buildroot>
+aptcache_store() {
+	buildroot="$1"
+
+	tarballname="aptcache.$buildroot.tar"
+	cd "$buildroot"; tar cf "../$tarballname" var/cache/apt/archives/*.deb; cd ..
+}

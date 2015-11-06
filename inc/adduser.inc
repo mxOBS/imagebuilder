@@ -20,19 +20,20 @@
 # THE SOFTWARE.
 #
 
-# usage: <buildroot>
-cleanup() {
+# usage: <buildroot> <username> <password> <shell> <groups>
+adduser() {
 	buildroot="$1"
+	username=$2
+	password="$3"
+	shell=$4
+	shift 4
+	groups="$(echo $@ | sed -e "s; ;,;g")"
 
-	# save apt package cache
-	aptcache_store "$buildroot"
+	# encrypt password
+	password_encrypted=$(perl -e 'print crypt($ARGV[0], "password")' "$password")
 
-	# clean apt package store
-	chroot_run $buildroot "apt-get clean"
-
-	# remove resolv.conf of host system
-	rm -vf $buildroot/etc/resolv.conf
+	chroot_run "$buildroot" useradd -G $groups -m -U -s $shell -p "$password_encrypted" $username
 }
 
 # define required programs
-dependencies="rm"
+dependencies=

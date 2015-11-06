@@ -20,19 +20,22 @@
 # THE SOFTWARE.
 #
 
-# usage: <buildroot>
-cleanup() {
+# usage: <buildroot> <packages>
+installpkg() {
 	buildroot="$1"
+	shift 1
+	packages="$*"
 
-	# save apt package cache
-	aptcache_store "$buildroot"
+	# block apt from running system services
+	echo "exit 101" > "$buildroot/usr/sbin/policy-rc.d"
+	chmod 777 "$buildroot/usr/sbin/policy-rc.d"
 
-	# clean apt package store
-	chroot_run $buildroot "apt-get clean"
+	# actually install packages
+	chroot_run "$buildroot" apt-get -y install $packages
 
-	# remove resolv.conf of host system
-	rm -vf $buildroot/etc/resolv.conf
+	# unblock system services
+	rm -f "$buildroot/usr/sbin/policy-rc.d"
 }
 
 # define required programs
-dependencies="rm"
+dependencies="rm chmod"

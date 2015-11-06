@@ -18,7 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-# 
+#
 
 function qemu_setup() {
 	buildroot=$1
@@ -50,9 +50,14 @@ function qemu_remove() {
 			return
 		fi
 		if [ -e /usr/bin/qemu-arm-binfmt ] && [ -e /usr/bin/qemu-arm ]; then
-#			rm $buildroot/usr/bin/qemu-arm-binfmt
-#			rm $buildroot/usr/bin/qemu-arm
+			rm $buildroot/usr/bin/qemu-arm-binfmt
+			rm $buildroot/usr/bin/qemu-arm
 			return
 		fi
 	fi
 }
+
+# HACK
+# define qemu-linux-user as a dependency if its not found
+dependencies=cp
+[[ `uname -m` != arm* ]] && [ ! -e /usr/bin/qemu-arm-static ] && [ ! -e /usr/bin/qemu-arm-binfmt ] && [ ! -e /usr/bin/qemu-arm ] && dependencies="$dependencies qemu-linux-user"
