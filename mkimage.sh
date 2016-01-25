@@ -88,7 +88,7 @@ p
 8192
 
 w
-q" | sudo fdisk $LODEV 1>/dev/null 2>/dev/null
+q" | fdisk $LODEV 1>/dev/null 2>/dev/null
 printf "Done\n"
 
 # reload partition table
@@ -96,8 +96,9 @@ partprobe $LODEV
 
 # create filesystem
 printf "Creating new ext4 filesystem: "
-mkfs.ext4 -L rootfs ${LODEV}p1 1>/dev/null 2>/dev/null
-test $? != 0 && exit 1
+#mkfs.ext4 -L rootfs ${LODEV}p1 1>/dev/null 2>/dev/null
+mkfs.ext4 -L rootfs ${LODEV}p1
+test $? != 0 && printf "Failed\n" && exit 1
 printf "Done\n"
 
 # mount filesystem
