@@ -88,7 +88,7 @@ install_desktop $buildroot $distro $type
 save_aptcache $buildroot
 
 # configure system
-configure_system $buildroot
+configure_system $buildroot $distro
 
 # remove traces of build-system
 cleanup_system $buildroot
