@@ -102,6 +102,10 @@ EOF
 	# HACK: set sticky-bit on ping and ping6
 	chroot_run $buildroot chmod +s /bin/ping /bin/ping6
 
+	# TODO: better rfkill hack by mk01:
+	# udev rule:
+	# KERNEL=="wlan*", RUN+="/bin/sh -c '/bin/mknod rfkill 10 62;/sbin/rfkill unblock wifi'"
+
 	if [ $distro = "jessie" ]; then
 		# HACK: unblock rfkill on every boot
 		ln -sfv /dev/null $buildroot/etc/systemd/system/systemd-rfkill@rfkill0.service
