@@ -102,45 +102,9 @@ EOF
 	# HACK: set sticky-bit on ping and ping6
 	chroot_run $buildroot chmod +s /bin/ping /bin/ping6
 
-	# TODO: better rfkill hack by mk01:
-	# udev rule:
-	# KERNEL=="wlan*", RUN+="/bin/sh -c '/bin/mknod rfkill 10 62;/sbin/rfkill unblock wifi'"
-
-	if [ $distro = "jessie" ]; then
-		# HACK: unblock rfkill on every boot
-		ln -sfv /dev/null $buildroot/etc/systemd/system/systemd-rfkill@rfkill0.service
-		mv $buildroot/etc/rc.local $buildroot/etc/rc.local.orig
-		cat > $buildroot/etc/rc.local << EOF
-#!/bin/bash
-#
-# rc.local
-#
-# This script is executed at the end of each multiuser runlevel.
-# Make sure that the script will "exit 0" on success or any other
-# value on error.
-#
-# This script unblocks wifi at boot
-
-# wait for rfkill to come up
-maxcount=2
-while [ ! -e /dev/rfkill ]; do
-	((maxcount=maxcount-1))
-	test $maxcount -eq 0 && exit 0
-        sleep 1
-done
-
-# wait for wlan0 to come up
-maxcount=2
-while [ true ]; do
-        systemctl status sys-subsystem-net-devices-wlan0.device 2>/dev/null 1>/dev/null && break
-	((maxcount=maxcount-1))
-	test $maxcount -eq 0 && exit 0
-        sleep 1
-done
-
-# unblock wifi
-rfkill unblock wifi
-EOF
-	chmod 755 $buildroot/etc/rc.local
-	fi
+	# HACK: unblock wifi on every boot unconditionally
+	# inspired by mk01, thanks a lot!
+	# TODO: figure out how to get rid of the call to sleep
+	echo "KERNEL==\"wlan*\", RUN+=\"/bin/sh -c '/bin/mknod /dev/rfkill c 10 62; sleep 1; /usr/sbin/rfkill unblock wifi'\"" \
+	> $buildroot/etc/udev/rules.d/unblock-wifi.rules
 }
