@@ -35,7 +35,7 @@ if [ "$UID" != 0 ]; then
 	exit 1
 fi
 
-progs="dd losetup fdisk tar mkfs.ext4 qemu-img"
+progs="dd losetup fdisk tar mkfs.ext4 qemu-img mkimage"
 for prog in $progs; do
 	which $prog 1>/dev/null 2>/dev/null
 	if [ $? != 0 ]; then
