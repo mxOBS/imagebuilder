@@ -101,6 +101,7 @@ install_base() {
 	# create uEnv.txt
 	echo 'mmcroot=/dev/mmcblk0p1 rootwait rw' > $buildroot/boot/uEnv.txt
 	echo 'mmcargs=setenv bootargs console=ttymxc0,115200n8 console=tty root=${mmcroot} quiet' >> $buildroot/boot/uEnv.txt
+	echo 'loadfdt=if test ${boottype} = mmc; then load mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${file_prefix}dtb/${fdt_file}; else ${get_cmd} ${fdt_addr} ${fdt_file}; fi;' >> $buildroot/boot/uEnv.txt
 
 	# resize FS on first boot
 	cat > $buildroot/etc/runonce.d/expand-fs.sh << EOF
