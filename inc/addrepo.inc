@@ -20,6 +20,15 @@
 # THE SOFTWARE.
 #
 
+deleterepos() {
+	buildroot="$1"
+	name="$2"
+
+	if [ -f "$buildroot/etc/apt/$name" ]
+		rm -f "$buildroot/etc/apt/$name"
+	fi
+}
+
 # usage: <buildroot> <name> <url> <suffix>
 addrepo() {
 	buildroot="$1"

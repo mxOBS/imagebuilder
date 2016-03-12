@@ -26,6 +26,7 @@
 bootstrap "$buildroot" jessie apt-transport-https ca-certificates initramfs-tools locales
 
 # add debian repos
+deleterepos "$buildroot" sources.list
 addrepo "$buildroot" sources.list http://httpredir.debian.org/debian jessie main
 addrepo "$buildroot" sources.list http://httpredir.debian.org/debian jessie-updates main
 addrepo "$buildroot" sources.list http://security.debian.org/ jessie/updates main
