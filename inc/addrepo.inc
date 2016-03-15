@@ -24,7 +24,7 @@ deleterepos() {
 	buildroot="$1"
 	name="$2"
 
-	if [ -f "$buildroot/etc/apt/$name" ]
+	if [ -f "$buildroot/etc/apt/$name" ]; then
 		rm -f "$buildroot/etc/apt/$name"
 	fi
 }
