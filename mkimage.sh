@@ -131,8 +131,8 @@ ramdiskaddr=0x6000000
 fdt_high=0x07a12000
 
 # load DTB
-echo "Loading armada-388-clearfog.dtb"
-ext4load mmc 0:1 \${fdtaddr} /boot/armada-388-clearfog.dtb
+echo "Loading dtb/armada-388-clearfog.dtb"
+ext4load mmc 0:1 \${fdtaddr} /boot/dtb/armada-388-clearfog.dtb
 
 # load Kernel
 echo "Loading zImage ..."
