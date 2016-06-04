@@ -115,10 +115,12 @@ printf "Done\n"
 # install u-boot
 printf "Installing bootloader: "
 if [ -e $MOUNT/boot/cubox-i-spl.bin ] && [ -e $MOUNT/boot/u-boot.img ]; then
+	# IMX6
 	dd if=$MOUNT/boot/cubox-i-spl.bin of=$LODEV bs=1K seek=1 1>/dev/null 2>/dev/null
 	dd if=$MOUNT/boot/u-boot.img of=$LODEV bs=1K seek=42 1>/dev/null 2>/dev/null
 fi
 if [ -e $MOUNT/boot/u-boot-clearfog.mmc ]; then
+	# A38X
 	dd if=$MOUNT/boot/u-boot-clearfog.mmc of=$LODEV bs=512 seek=1 1>/dev/null 2>/dev/null
 	cat > $MOUNT/boot.script << EOF
 # configure bootargs
@@ -152,6 +154,20 @@ echo "Booting ..."
 bootz \${kerneladdr} \${ramdiskaddr}:\${ramdisksize} \${fdtaddr}
 EOF
 	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $MOUNT/boot.script $MOUNT/boot.scr 1>/dev/null 2>/dev/null
+fi
+if [ -h $MOUNT/boot/uImage ] && [[ $(readlink $MOUNT/boot/uImage) = uImage-*-letux ]]; then
+	# GTA04
+	# boot script because original one does not look for DTB in /boot/dtb/
+	cat > $MOUNT/boot/boot.script << EOF
+i2c dev 0
+mmc rescan 0
+ext4load mmc 0:1 \${loadaddr} /boot/uImage
+ext4load mmc 0:1 \${loadaddrfdt} /boot/dtb/\${devicetree}.dtb 
+# TODO: initrd
+setenv bootargs console=ttyO2,115200n8 root=/dev/mmcblk0p1 rootfstype=ext4 rootwait
+bootm \${loadaddr} - \${loadaddrfdt}
+EOF
+    mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $MOUNT/boot/boot.script $MOUNT/boot/bootargs.scr 1>/dev/null 2>/dev/null
 fi
 printf "Done\n"
 
