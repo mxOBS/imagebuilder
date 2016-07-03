@@ -26,7 +26,7 @@ bootstrap() {
 	distro=$2
 	shift 2
 	packages="$(echo $* | sed -e "s; ;,;g")"
-	INCLUDE_PACKAGES_ARG=$(test -n "$packages" && echo "--include=\"$packages\"")
+	INCLUDE_PACKAGES_ARG=$(test -n "$packages" && echo "--include=$packages")
 
 	# select distribution-specific settings
 	mirror=
