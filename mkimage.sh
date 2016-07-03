@@ -130,7 +130,7 @@ setenv bootargs 'root=/dev/mmcblk0p1 rootfstype=ext4 rootwait rw console=ttyS0,1
 kerneladdr=0x2000000
 fdtaddr=0x5F00000
 ramdiskaddr=0x6000000
-fdt_high=0x07a12000
+setenv fdt_high 0x07a12000
 
 # load DTB
 echo "Loading dtb/armada-388-clearfog.dtb"
