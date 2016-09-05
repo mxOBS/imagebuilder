@@ -39,7 +39,7 @@ addaptkey "$buildroot" https://repo.solid-build.xyz/debian/jessie/bsp-imx6/Relea
 chroot_run "$buildroot" apt-get update
 
 # install HW support packages
-installpkg "$buildroot" linux-image-3.10.y-marvell-clearfog u-boot-marvell-clearfog
+installpkg "$buildroot" linux-image-4.4.y-clearfog u-boot-marvell-clearfog
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano mtd-utils psmisc ntfs-3g iw
