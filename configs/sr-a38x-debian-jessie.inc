@@ -25,6 +25,10 @@
 # bootstrap a debian system
 bootstrap "$buildroot" jessie apt-transport-https ca-certificates initramfs-tools locales
 
+# Configure Defaults (before any packages, so they are taken into account by post scripts)
+# enable fsck on every boot
+sed -i "s;^.*FSCKFIX=.*$;FSCKFIX=yes;g" /etc/default/rcS
+
 # add debian repos
 deleterepos "$buildroot" sources.list
 addrepo "$buildroot" sources.list http://httpredir.debian.org/debian jessie main
