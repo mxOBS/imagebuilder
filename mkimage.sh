@@ -144,10 +144,6 @@ echo "Loading initrd ..."
 ext4load mmc 0:1 \${ramdiskaddr} /boot/initrd
 ramdisksize=0x${filesize}
 
-# Sleep a while so the MMC driver can settle down
-echo "Sleeping 5 seconds ..."
-sleep 5
-
 # boot
 echo "Booting ..."
 bootz \${kerneladdr} \${ramdiskaddr}:\${ramdisksize} \${fdtaddr}
