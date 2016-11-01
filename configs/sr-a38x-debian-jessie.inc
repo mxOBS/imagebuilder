@@ -46,7 +46,8 @@ chroot_run "$buildroot" apt-get update
 installpkg "$buildroot" linux-image-4.4.y-clearfog u-boot-marvell-clearfog
 
 # install a bunch of useful applications
-installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano mtd-utils psmisc ntfs-3g iw
+installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill
+installpkg "$buildroot" devmem2 usbutils pciutils i2c-tools mtd-utils
 installpkg "$buildroot" command-not-found
 chroot_run "$buildroot" update-command-not-found
 
