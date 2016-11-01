@@ -37,5 +37,28 @@ installpkg() {
 	rm -f "$buildroot/usr/sbin/policy-rc.d"
 }
 
+# usage: <buildroot> <debs>
+installpkg_local() {
+	buildroot="$1"
+	shift 1
+	debs="$*"
+
+	# block apt from running system services
+	echo "exit 101" > "$buildroot/usr/sbin/policy-rc.d"
+	chmod 777 "$buildroot/usr/sbin/policy-rc.d"
+
+	# copy debs to target system
+	cp -L $debs "$buildroot/"
+
+	# actually install debs
+	chroot_run "$buildroot" dpkg -i $debs
+
+	# delete debs
+	rm -f "$buildroot/*.deb"
+
+	# unblock system services
+	rm -f "$buildroot/usr/sbin/policy-rc.d"
+}
+
 # define required programs
 dependencies="rm chmod"
