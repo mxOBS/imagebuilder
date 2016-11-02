@@ -35,7 +35,7 @@ if [ "$UID" != 0 ]; then
 	exit 1
 fi
 
-progs="dd losetup fdisk tar mkfs.ext4 qemu-img mkimage"
+progs="dd losetup fdisk tar mkfs.ext4 qemu-img mkimage partprobe"
 for prog in $progs; do
 	which $prog 1>/dev/null 2>/dev/null
 	if [ $? != 0 ]; then
@@ -122,6 +122,13 @@ if [ -e $MOUNT/boot/u-boot-clearfog.mmc ]; then
 	# A38X
 	dd if=$MOUNT/boot/u-boot-clearfog.mmc of=$LODEV bs=512 seek=1 1>/dev/null 2>/dev/null
 	cat > $MOUNT/boot.script << EOF
+# perform first-boot tasks
+if test "\${sr_firstboot}" != "done"; then
+	# save initial environment
+	setenv sr_firstboot done
+	saveenv
+fi
+
 # configure bootargs
 setenv bootargs 'root=/dev/mmcblk0p1 rootfstype=ext4 rootwait rw console=ttyS0,115200n8'
 
@@ -142,7 +149,7 @@ ext4load mmc 0:1 \${kerneladdr} /boot/zImage
 # load Ramdisk
 echo "Loading initrd ..."
 ext4load mmc 0:1 \${ramdiskaddr} /boot/initrd
-ramdisksize=0x${filesize}
+ramdisksize=0x\${filesize}
 
 # boot
 echo "Booting ..."
