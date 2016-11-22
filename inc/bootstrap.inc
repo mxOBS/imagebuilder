@@ -24,7 +24,8 @@
 bootstrap() {
 	buildroot=$1
 	distro=$2
-	shift 2
+	arch=$3
+	shift 3
 	packages="$(echo $* | sed -e "s; ;,;g")"
 	INCLUDE_PACKAGES_ARG=$(test -n "$packages" && echo "--include=$packages")
 
@@ -42,15 +43,16 @@ bootstrap() {
 
 	# create tarball of packages if it doesnt exist yet
 	if [ ! -e $distro.bootstrap.tar ]; then
-		debootstrap --no-check-gpg --arch=armhf $INCLUDE_PACKAGES_ARG --make-tarball=$PWD/$distro.bootstrap.tar $distro $buildroot $mirror
+		debootstrap --no-check-gpg --arch=$arch $INCLUDE_PACKAGES_ARG --make-tarball=$PWD/$distro.bootstrap.tar 
+$distro $buildroot $mirror
 	fi
 
 	# on foreign architectures, run second stage manually
 	if [[ `uname -m` = arm* ]]; then
-		debootstrap --no-check-gpg --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $INCLUDE_PACKAGES_ARG $distro $buildroot $mirror
+		debootstrap --no-check-gpg --arch=$arch --unpack-tarball=$PWD/$distro.bootstrap.tar $INCLUDE_PACKAGES_ARG $distro $buildroot $mirror
 	else
 		# first stage
-		debootstrap --no-check-gpg --foreign --arch=armhf --unpack-tarball=$PWD/$distro.bootstrap.tar $INCLUDE_PACKAGES_ARG $distro $buildroot $mirror
+		debootstrap --no-check-gpg --foreign --arch=$arch --unpack-tarball=$PWD/$distro.bootstrap.tar $INCLUDE_PACKAGES_ARG $distro $buildroot $mirror
 
 		# second stage in chroot
 		chroot_run $buildroot "/bin/bash /debootstrap/debootstrap --second-stage"

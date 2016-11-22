@@ -34,6 +34,8 @@ function qemu_setup() {
 		if [ -e /usr/bin/qemu-arm-binfmt ] && [ -e /usr/bin/qemu-arm ]; then
 			cp /usr/bin/qemu-arm-binfmt $buildroot/usr/bin/
 			cp /usr/bin/qemu-arm $buildroot/usr/bin/
+			cp /usr/bin/qemu-aarch64-binfmt $buildroot/usr/bin/
+			cp /usr/bin/qemu-aarch64 $buildroot/usr/bin/
 			return
 		fi
 
@@ -52,6 +54,8 @@ function qemu_remove() {
 		if [ -e /usr/bin/qemu-arm-binfmt ] && [ -e /usr/bin/qemu-arm ]; then
 			rm $buildroot/usr/bin/qemu-arm-binfmt
 			rm $buildroot/usr/bin/qemu-arm
+			rm $buildroot/usr/bin/qemu-aarch64-binfmt
+			rm $buildroot/usr/bin/qemu-aarch64
 			return
 		fi
 	fi

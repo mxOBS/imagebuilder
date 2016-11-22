@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2015-2016 Josua Mayer
+# Copyright (c) 2015 Josua Mayer
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,11 @@
 # This is the actual cookbook
 
 # bootstrap a debian system
-bootstrap "$buildroot" jessie armhf
+bootstrap "$buildroot" jessie arm64 apt-transport-https ca-certificates initramfs-tools locales
+
+# Configure Defaults (before any packages, so they are taken into account by post scripts)
+# enable fsck on every boot
+sed -i "s;^.*FSCKFIX=.*$;FSCKFIX=yes;g" /etc/default/rcS
 
 # add debian repos
 deleterepos "$buildroot" sources.list
@@ -32,23 +36,28 @@ addrepo "$buildroot" sources.list http://httpredir.debian.org/debian jessie-upda
 addrepo "$buildroot" sources.list http://security.debian.org/ jessie/updates main
 
 # add bsp repo
-addrepo "$buildroot" sources.list.d/goldelico.list [trusted=yes] http://10.80.39.247/gta04 /
+addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/jessie/bsp-imx6 ./
+addaptkey "$buildroot" https://repo.solid-build.xyz/debian/jessie/bsp-imx6/Release.key
 
 # refresh repos
 chroot_run "$buildroot" apt-get update
 
-# install HW support packages
-installpkg "$buildroot" linux-image-letux
-
 # install a bunch of useful applications
-installpkg "$buildroot" sudo openssh-server nano mtd-utils psmisc ntfs-3g iw locales command-not-found
+installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill
+installpkg "$buildroot" devmem2 usbutils pciutils i2c-tools mtd-utils
+installpkg "$buildroot" command-not-found
 chroot_run "$buildroot" update-command-not-found
+
+# for security reasons recreate the ssh keys on first boot
+installpkg "$buildroot" runonce
+rm -fv "$buildroot"/etc/ssh/*_key{,.pub}
+chroot_run "$buildroot" runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reconfigure openssh-server
 
 # add default user
 adduser "$buildroot" debian debian /bin/bash sudo
 
 # set hostname
-sethostname "$buildroot" gta04
+sethostname "$buildroot" linux
 
 # set default runlevel
 chroot_run "$buildroot" systemctl set-default multi-user.target
