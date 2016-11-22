@@ -45,6 +45,11 @@ chroot_run "$buildroot" apt-get update
 # install HW support packages
 installpkg "$buildroot" linux-image-4.4.y-clearfog u-boot-marvell-clearfog
 
+# install grub (EFI)
+installpkg "$buildroot" grub-efi-arm
+mkdir -p "$buildroot/boot/efi/efi/boot"
+chroot_run "$buildroot" grub-mkstandalone -O arm-efi -o /boot/efi/efi/boot/bootarm.efi
+
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill
 installpkg "$buildroot" devmem2 usbutils pciutils i2c-tools mtd-utils
