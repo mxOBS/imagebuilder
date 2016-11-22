@@ -137,10 +137,17 @@ kerneladdr=0x2000000
 fdtaddr=0x5F00000
 ramdiskaddr=0x6000000
 setenv fdt_high 0x07a12000
+setenv initrd_high 0xFFFFFFFF
+
+# make sure fdt_file is set
+if test "\${fdt_file}" = "\${fdt_file}"; then
+	# fall back to Clearfog Pro
+	fdt_file=armada-388-clearfog-pro.dtb
+fi
 
 # load DTB
-echo "Loading dtb/armada-388-clearfog.dtb"
-ext4load mmc 0:1 \${fdtaddr} /boot/dtb/armada-388-clearfog.dtb
+echo "Loading dtb/\${fdt_file}"
+ext4load mmc 0:1 \${fdtaddr} /boot/dtb/\${fdt_file}
 
 # load Kernel
 echo "Loading zImage ..."
