@@ -82,6 +82,9 @@ restore_aptcache $buildroot
 # install software selection
 install_base $buildroot $distro
 
+# install downstream packages
+install_local $buildroot
+
 install_desktop $buildroot $distro $type
 
 # save apt cache for later use

@@ -164,6 +164,18 @@ collect_xfce() {
 
 # todo: kde, gnome3
 
+install_local() {
+	buildroot=$1
+
+	for file in *.deb; do
+		cp -v -L $file $buildroot/
+	done
+
+	chroot_run $buildroot "dpkg -i *.deb"
+
+	rm -f $buildroot/*.deb
+}
+
 install_desktop() {
 	buildroot=$1
 	distro=$2
