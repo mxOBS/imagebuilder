@@ -96,7 +96,7 @@ partprobe $LODEV
 
 # create filesystem
 printf "Creating new ext4 filesystem: "
-mkfs.ext4 -L rootfs ${LODEV}p1 1>/dev/null 2>/dev/null
+mkfs.ext4 -O ^64bit,^metadata_csum -L rootfs ${LODEV}p1 1>/dev/null 2>/dev/null
 test $? != 0 && exit 1
 printf "Done\n"
 
