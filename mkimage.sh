@@ -116,7 +116,7 @@ printf "Installing bootloader: "
 if [ -e $MOUNT/boot/cubox-i-spl.bin ] && [ -e $MOUNT/boot/u-boot.img ]; then
 	# IMX6
 	dd if=$MOUNT/boot/cubox-i-spl.bin of=$LODEV bs=1K seek=1 1>/dev/null 2>/dev/null
-	dd if=$MOUNT/boot/u-boot.img of=$LODEV bs=1K seek=42 1>/dev/null 2>/dev/null
+	dd if=$MOUNT/boot/u-boot.img of=$LODEV bs=1K seek=69 1>/dev/null 2>/dev/null
 fi
 if [ -e $MOUNT/boot/u-boot-clearfog.mmc ]; then
 	# A38X
