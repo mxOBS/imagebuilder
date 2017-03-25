@@ -171,7 +171,9 @@ install_local() {
 		cp -v -L $file $buildroot/
 	done
 
+	block_services_enable
 	chroot_run $buildroot "dpkg -i *.deb"
+	block_services_disable
 
 	rm -f $buildroot/*.deb
 }
