@@ -21,7 +21,8 @@
 # 
 
 function restore_aptcache() {
-	buildroot=$1
+	local buildroot=$1
+	local distro=$2
 
 	if [ -e $distro.pkgcache.tar ]; then
 		tar -C $buildroot -xf $distro.pkgcache.tar
@@ -29,33 +30,34 @@ function restore_aptcache() {
 }
 
 function save_aptcache() {
-	buildroot=$1
+	local buildroot=$1
 
-	curdir="$PWD"
+	local curdir="$PWD"
 	pushd $buildroot
 	tar -cf "$curdir/$distro.pkgcache.tar" var/cache/apt/archives/*.deb
 	popd
 }
 
 block_services_enable() {
-	buildroot=$1
+	local buildroot=$1
 
 	echo "exit 101" > $buildroot/usr/sbin/policy-rc.d
 	chmod 777 $buildroot/usr/sbin/policy-rc.d
 }
 
 block_services_disable() {
-	buildroot=$1
+	local buildroot=$1
 
 	rm -f $buildroot/usr/sbin/policy-rc.d
 }
 
 # usage: <buildroot>
 install_base() {
-	buildroot=$1
-	distro=$2
+	local buildroot=$1
+	local distro=$2
 
 	# collect packages to install
+	local PKGS
 	unset PKGS
 
 	# required packages for startup
@@ -77,7 +79,7 @@ install_base() {
 	# install galcore dummy packages, if they are available
 	for pkg in $buildroot/var/cache/apt/archives/galcore-dummy*.deb; do
 		test -e $pkg || continue
-		name=`basename $pkg`
+		local name=`basename $pkg`
 		chroot_run $buildroot "dpkg -i /var/cache/apt/archives/$name"
 	done
 
@@ -123,9 +125,10 @@ EOF
 }
 
 collect_x11() {
-	distro=$1
+	local distro=$1
 
 	# collect packages
+	local PKGS
 	unset PKGS
 
 	# core Xorg
@@ -140,8 +143,9 @@ collect_x11() {
 }
 
 collect_mate() {
-	distro=$1
+	local distro=$1
 
+	local PKGS
 	PKGS=(`collect_x11 $distro`)
 
 	PKGS=("${PKGS[@]}" "mate-desktop-environment" "blueman" "connman-ui")
@@ -150,8 +154,9 @@ collect_mate() {
 }
 
 collect_xfce() {
-	distro=$1
+	local distro=$1
 
+	local PKGS
 	PKGS=(`collect_x11 $distro`)
 
 	PKGS=("${PKGS[@]}" "xfce4" "xfce4-terminal" "connman-ui")
@@ -165,27 +170,28 @@ collect_xfce() {
 # todo: kde, gnome3
 
 install_local() {
-	buildroot=$1
+	local buildroot=$1
 
 	for file in *.deb; do
 		cp -v -L $file $buildroot/
 	done
 
-	block_services_enable
+	block_services_enable $buildroot
 	chroot_run $buildroot "dpkg -i *.deb"
-	block_services_disable
+	block_services_disable $buildroot
 
 	rm -f $buildroot/*.deb
 }
 
 install_desktop() {
-	buildroot=$1
-	distro=$2
-	type=$3
+	local buildroot=$1
+	local distro=$2
+	local type=$3
 
 	[ "$type" = "cli" ] && return 0
 
 	# collect packages
+	local PKGS
 	unset PKGS
 	[ "$type" = "mate" ] && PKGS=("${PKGS[@]}" "`collect_mate $distro`")
 	[ "$type" = "xfce" ] && PKGS=("${PKGS[@]}" "`collect_xfce $distro`")

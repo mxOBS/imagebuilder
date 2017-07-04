@@ -22,11 +22,11 @@
 
 # usage: <buildroot> <distro-codename>
 bootstrap_system() {
-	buildroot=$1
-	distro=$2
+	local buildroot=$1
+	local distro=$2
 
 	# select distribution-specific settings
-	mirror=
+	local mirror=
 	if [ "$distro" = "wheezy" ]; then
 		mirror="http://httpredir.debian.org/debian"
 	fi

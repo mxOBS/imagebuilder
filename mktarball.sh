@@ -77,7 +77,7 @@ bootstrap_system $buildroot $distro
 add_repos $buildroot $distro
 
 # restore apt cache from previous runs
-restore_aptcache $buildroot
+restore_aptcache $buildroot $distro
 
 # install software selection
 install_base $buildroot $distro

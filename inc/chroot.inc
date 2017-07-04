@@ -22,9 +22,9 @@
 
 # usage: <buildroot> <cmd>
 chroot_run() {
-	buildroot=$1
+	local buildroot=$1
 	shift
-	cmd="$@"
+	local cmd="$@"
 
 	qemu_setup $buildroot
 	echo $cmd

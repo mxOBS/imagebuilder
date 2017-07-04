@@ -22,6 +22,8 @@
 
 # usage: <buildroot>
 cleanup_system() {
+	local buildroot=$1
+
 	# clean apt package store
 	chroot_run $buildroot "apt-get clean"
 

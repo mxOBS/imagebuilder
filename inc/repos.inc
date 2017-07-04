@@ -23,8 +23,8 @@
 # This function adds all custom repositories to a system
 # usage: <buildroot> <distro-codename>
 add_repos() {
-	buildroot=$1
-	distro=$2
+	local buildroot=$1
+	local distro=$2
 
 	# start with distribution default repos
 	repofile=$buildroot/etc/apt/sources.list

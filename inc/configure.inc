@@ -22,11 +22,11 @@
 
 # usage: <buildroot> <distro codename>
 configure_system() {
-	buildroot=$1
-	distro=$2
+	local buildroot=$1
+	local distro=$2
 
 	# set hostname
-	hostname=linux
+	local hostname=linux
 	# debootstrap set the current systems hostname, replace it
 	sudo sed -i "s;$HOSTNAME;$hostname;g" $buildroot/etc/{ssh/*.pub}
 	echo "$hostname" > $buildroot/etc/hostname
@@ -64,10 +64,10 @@ EOF
 	chroot_run $buildroot runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reconfigure openssh-server
 
 	# create default user
-	user=debian
-	password=debian
-	groups="sudo,audio,video"
-	password_encrypted=`perl -e 'print crypt($ARGV[0], "password")' $password`
+	local user=debian
+	local password=debian
+	local groups="sudo,audio,video"
+	local password_encrypted=`perl -e 'print crypt($ARGV[0], "password")' $password`
 	chroot_run $buildroot useradd -G $groups -m -U -s /bin/bash -p $password_encrypted $user
 
 	# enable lightdm autologin
