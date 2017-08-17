@@ -100,6 +100,9 @@ mkfs.ext4 -L rootfs ${LODEV}p1 1>/dev/null 2>/dev/null
 test $? != 0 && printf "Failed\n" && exit 1
 printf "Done\n"
 
+# find filesystem uuid
+UUID=$(lsblk -n -o UUID ${LODEV}p1)
+
 # mount filesystem
 MOUNT=linux
 mkdir $MOUNT
@@ -118,8 +121,9 @@ if [ -e $MOUNT/boot/cubox-i-spl.bin ] && [ -e $MOUNT/boot/u-boot.img ]; then
 	dd if=$MOUNT/boot/cubox-i-spl.bin of=$LODEV bs=1K seek=1 1>/dev/null 2>/dev/null
 	dd if=$MOUNT/boot/u-boot.img of=$LODEV bs=1K seek=69 1>/dev/null 2>/dev/null
 fi
+
+# A38X - Marvell U-Boot
 if [ -e $MOUNT/boot/u-boot-clearfog.mmc ]; then
-	# A38X
 	dd if=$MOUNT/boot/u-boot-clearfog.mmc of=$LODEV bs=512 seek=1 1>/dev/null 2>/dev/null
 	cat > $MOUNT/boot.script << EOF
 # perform first-boot tasks
@@ -164,8 +168,26 @@ bootz \${kerneladdr} \${ramdiskaddr}:\${ramdisksize} \${fdtaddr}
 EOF
 	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $MOUNT/boot.script $MOUNT/boot.scr 1>/dev/null 2>/dev/null
 fi
+
+# A38X Mainline U-Boot with Distro support
+if [ -e $MOUNT/boot/spl-clearfog.kwb ]; then
+	dd if=$MOUNT/boot/spl-clearfog.kwb of=$LODEV bs=512 seek=1 1>/dev/null 2>/dev/null
+
+	# create generic extlinux.conf pointing to standard symlinks
+	# Note: sadly not debian-standard!
+	install -d -o root -g root $MOUNT/boot/extlinux
+	cat > $MOUNT/boot/extlinux/extlinux.conf << EOF
+TIMEOUT 0
+LABEL default
+	LINUX ../zImage
+	INITRD ../initrd
+	FDTDIR ../dtb/
+	APPEND console=ttyS0,115200n8 root=UUID=$UUID rootwait
+EOF
+fi
+
+# GTA04
 if [ -h $MOUNT/boot/uImage ] && [[ $(readlink $MOUNT/boot/uImage) = uImage-*-letux ]]; then
-	# GTA04
 	# boot script because original one does not look for DTB in /boot/dtb/
 	cat > $MOUNT/boot/boot.script << EOF
 i2c dev 0
