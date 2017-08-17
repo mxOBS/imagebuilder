@@ -52,10 +52,10 @@ for m in inc/*.inc; do
 	source $m
 
 	# and check its dependencies
-	[ -z "$dependencies" ] && for dep in $dependencies; do
-		which $program 1>/dev/null 2>/dev/null
+	for dep in $dependencies; do
+		which $dep 1>/dev/null 2>/dev/null
 		if [ $? != 0 ]; then
-			echo "Error: $program required but not found!"
+			echo "Error: $dep required but not found!"
 			exit 1
 		fi
 	done
