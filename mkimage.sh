@@ -100,9 +100,6 @@ mkfs.ext4 -L rootfs ${LODEV}p1 1>/dev/null 2>/dev/null
 test $? != 0 && printf "Failed\n" && exit 1
 printf "Done\n"
 
-# find filesystem uuid
-UUID=$(lsblk -n -o UUID ${LODEV}p1)
-
 # mount filesystem
 MOUNT=linux
 mkdir $MOUNT
@@ -111,6 +108,15 @@ mount ${LODEV}p1 linux
 # install files
 printf "Unpacking rootfs into image: "
 tar -C $MOUNT --numeric-owner -xpf $archive
+test $? != 0 && exit 1
+printf "Done\n"
+
+# find filesystem uuid
+UUID=$(lsblk -n -o UUID ${LODEV}p1)
+
+# patch fstab replacing generic /dev/root name if any
+printf "Patching fstab with actual filesystem UUID: "
+sed -i "s;^/dev/root;UUID=$UUID;g" $MOUNT/etc/fstab
 test $? != 0 && exit 1
 printf "Done\n"
 
