@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2017 Josua Mayer
+# Copyright (c) 2015 Josua Mayer
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 # This is the actual cookbook
 
 # bootstrap a debian system
-bootstrap "$buildroot" stretch armhf apt-transport-https ca-certificates initramfs-tools locales
+bootstrap "$buildroot" stretch arm64 apt-transport-https ca-certificates initramfs-tools locales
 
 # Configure Defaults (before any packages, so they are taken into account by post scripts)
 # enable fsck on every boot
@@ -35,7 +35,7 @@ addrepo "$buildroot" sources.list http://httpredir.debian.org/debian stretch mai
 addrepo "$buildroot" sources.list http://httpredir.debian.org/debian stretch-updates main
 addrepo "$buildroot" sources.list http://security.debian.org/ stretch/updates main
 
-# add BSP repo
+# add bsp repo
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/stretch/bsp-imx6 ./
 addaptkey "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx6/Release.key
 
@@ -43,7 +43,7 @@ addaptkey "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx6/Rele
 chroot_run "$buildroot" apt-get update
 
 # install HW support packages
-installpkg "$buildroot" u-boot-clearfog linux-image-4.4.y-clearfog
+installpkg "$buildroot" linux-image-4.4.y-mcbin-marvell
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill
@@ -51,28 +51,8 @@ installpkg "$buildroot" devmem2 usbutils pciutils i2c-tools mtd-utils
 installpkg "$buildroot" command-not-found
 chroot_run "$buildroot" update-command-not-found
 
-# install automatic filesystem expander script
-installpkg "$buildroot" expand-fs runonce
-cat > "$buildroot/etc/runonce.d/expand-fs.sh" << EOF
-# run resize script
-/bin/bash /usr/sbin/expand-fs /dev/mmcblk0 /dev/mmcblk0p1
-s=\$?
-
-# check exit status
-if [ \$s = 2 ]; then
-	# partprobe failed, so schedule stage 2 once more
-	runonce-helper add expand-fs-stage2 /bin/bash /usr/sbin/expand-fs /dev/mmcblk0 /dev/mmcblk0p1 2
-	exit 0
-fi
-
-# return exit status
-exit \$s
-EOF
-
-# install helper script for easy boot kernel selection
-install -v -m755 -o root -g root scripts/selectkernel.sh "$buildroot/boot/"
-
 # for security reasons recreate the ssh keys on first boot
+installpkg "$buildroot" runonce
 rm -fv "$buildroot"/etc/ssh/*_key{,.pub}
 chroot_run "$buildroot" runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reconfigure openssh-server
 
@@ -80,13 +60,18 @@ chroot_run "$buildroot" runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reco
 adduser "$buildroot" debian debian /bin/bash sudo
 
 # set hostname
-sethostname "$buildroot" clearfog
+sethostname "$buildroot" linux
 
 # set default runlevel
 chroot_run "$buildroot" systemctl set-default multi-user.target
 
 # spawn getty on serial port
 chroot_run "$buildroot" systemctl enable serial-getty@ttyS0.service
+
+# install Grub2 (EFI)
+installpkg "$buildroot" grub-efi-arm64
+mkdir -p "$buildroot/boot/efi/efi/boot"
+# standalone image will be created by mkefiimage.sh after filesystem uuid is known
 
 # mount /dev/root from fstab
 # Note: breaks flash-kernel package which expects a more meaningful value to include in initrd!

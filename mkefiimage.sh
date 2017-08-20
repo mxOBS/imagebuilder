@@ -82,7 +82,7 @@ test $? != 0 && exit 1
 printf "Done\n"
 
 # create partitions
-# tiny EFI partition at 2048-8191
+# tiny EFI partition at 2048-16383
 # rootfs beyond (so it starts at 8192)
 printf "Creating partition table: "
 echo "o
@@ -90,7 +90,7 @@ n
 p
 1
 
-8191
+16383
 n
 p
 2
@@ -131,6 +131,48 @@ printf "Unpacking rootfs into image: "
 tar -C $MOUNT --numeric-owner -xpf $archive
 test $? != 0 && exit 1
 printf "Done\n"
+
+# find efi filesystem uuid
+EFIUUID=$(lsblk -n -o UUID ${LODEV}p1)
+
+# find root filesystem uuid
+ROOTUUID=$(lsblk -n -o UUID ${LODEV}p2)
+
+# patch fstab replacing generic /dev/root name if any
+printf "Patching fstab with actual filesystem UUIDs: "
+sed -i "s;^/dev/root;UUID=$ROOTUUID;g" $MOUNT/etc/fstab
+test $? != 0 && exit 1
+# add mountpoint for EFI partition to fstab
+cat >> $MOUNT/etc/fstab << EOF
+UUID=$EFIUUID /boot/efi vfat umask=0002 0 0
+EOF
+test $? != 0 && exit 1
+printf "Done\n"
+
+# install a firstboot grub efi image
+printf "Installing initial grub image: "
+FILE=$(mktemp)
+cat > $FILE << EOF
+set timeout=3
+set default=0
+menuentry "Default Kernel" {
+	search --no-floppy --fs-uuid --set root $ROOTUUID
+	linux /boot/Image root=UUID=$ROOTUUID rootwait console=ttyS0,115200n8
+	initrd /boot/initrd
+}
+EOF
+grub2-mkstandalone \
+	--directory=$MOUNT/usr/lib/grub/arm64-efi \
+	--locale-directory=$MOUNT/usr/share/locale \
+	-O arm64-efi \
+	--modules="acpi fdt part_msdos part_gpt fat ext2 search_fs_uuid" \
+	-o $MOUNT/boot/efi/efi/boot/bootaa64.efi \
+	"boot/grub/grub.cfg=$FILE"
+s=$?
+rm -f $FILE
+test $s != 0 && exit 1
+printf "Done\n"
+s=
 
 # flush caches
 printf "Flushing kernel filesystem caches: "
