@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2015 Josua Mayer
+# Copyright (c) 2015-2017 Josua Mayer
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ addrepo "$buildroot" sources.list http://httpredir.debian.org/debian jessie main
 addrepo "$buildroot" sources.list http://httpredir.debian.org/debian jessie-updates main
 addrepo "$buildroot" sources.list http://security.debian.org/ jessie/updates main
 
-# add bsp repo
+# add BSP repo
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/jessie/bsp-imx6 ./
 addaptkey "$buildroot" https://repo.solid-build.xyz/debian/jessie/bsp-imx6/Release.key
 
@@ -43,12 +43,7 @@ addaptkey "$buildroot" https://repo.solid-build.xyz/debian/jessie/bsp-imx6/Relea
 chroot_run "$buildroot" apt-get update
 
 # install HW support packages
-installpkg "$buildroot" linux-image-4.4.y-clearfog u-boot-marvell-clearfog
-
-# install grub (EFI)
-installpkg "$buildroot" grub-efi-arm
-mkdir -p "$buildroot/boot/efi/efi/boot"
-chroot_run "$buildroot" grub-mkstandalone -O arm-efi -o /boot/efi/efi/boot/bootarm.efi
+installpkg "$buildroot" u-boot-clearfog linux-image-4.4.y-clearfog
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill
@@ -92,6 +87,12 @@ chroot_run "$buildroot" systemctl set-default multi-user.target
 
 # spawn getty on serial port
 chroot_run "$buildroot" systemctl enable serial-getty@ttyS0.service
+
+# mount /dev/root from fstab
+# Note: breaks flash-kernel package which expects a more meaningful value to include in initrd!
+cat > $MOUNT/etc/fstab << EOF
+/dev/root / auto defaults 0 0
+EOF
 
 # remove traces of build-system
 cleanup "$buildroot"
