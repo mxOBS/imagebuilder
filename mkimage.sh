@@ -187,7 +187,7 @@ TIMEOUT 0
 LABEL default
 	LINUX ../zImage
 	INITRD ../initrd
-	FDTDIR ../dtb/
+	FDTDIR ../dtb-dir/
 	APPEND console=ttyS0,115200n8 root=UUID=$UUID rootwait
 EOF
 fi

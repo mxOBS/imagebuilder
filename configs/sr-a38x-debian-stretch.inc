@@ -89,6 +89,7 @@ chroot_run "$buildroot" systemctl set-default multi-user.target
 chroot_run "$buildroot" systemctl enable serial-getty@ttyS0.service
 
 # mount /dev/root from fstab
+# Note: breaks flash-kernel package which expects a more meaningful value to include in initrd!
 cat > $MOUNT/etc/fstab << EOF
 /dev/root / auto defaults 0 0
 EOF
