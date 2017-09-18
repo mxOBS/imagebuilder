@@ -23,22 +23,22 @@
 # This is the actual cookbook
 
 # bootstrap a debian system
-bootstrap "$buildroot" jessie armhf
+bootstrap "$buildroot" testing armhf
 
 # add debian repos
 deleterepos "$buildroot" sources.list
-addrepo "$buildroot" sources.list http://httpredir.debian.org/debian jessie main
-addrepo "$buildroot" sources.list http://httpredir.debian.org/debian jessie-updates main
-addrepo "$buildroot" sources.list http://security.debian.org/ jessie/updates main
+addrepo "$buildroot" sources.list http://httpredir.debian.org/debian testing main non-free
+addrepo "$buildroot" sources.list http://httpredir.debian.org/debian testing-updates main non-free
+addrepo "$buildroot" sources.list http://security.debian.org/ testing/updates main non-free
 
 # add bsp repo
-addrepo "$buildroot" sources.list.d/goldelico.list [trusted=yes] http://10.80.39.247/gta04 /
+#addrepo "$buildroot" sources.list.d/goldelico.list [trusted=yes] http://10.80.39.247/gta04 /
 
 # refresh repos
 chroot_run "$buildroot" apt-get update
 
 # install HW support packages
-installpkg "$buildroot" linux-image-letux
+installpkg "$buildroot" linux-image-armmp firmware-libertas
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server nano mtd-utils psmisc ntfs-3g iw locales command-not-found
