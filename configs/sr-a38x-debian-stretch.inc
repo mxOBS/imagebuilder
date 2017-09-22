@@ -53,21 +53,7 @@ chroot_run "$buildroot" update-command-not-found
 
 # install automatic filesystem expander script
 installpkg "$buildroot" expand-fs runonce
-cat > "$buildroot/etc/runonce.d/expand-fs.sh" << EOF
-# run resize script
-/bin/bash /usr/sbin/expand-fs /dev/mmcblk0 /dev/mmcblk0p1
-s=\$?
-
-# check exit status
-if [ \$s = 2 ]; then
-	# partprobe failed, so schedule stage 2 once more
-	runonce-helper add expand-fs-stage2 /bin/bash /usr/sbin/expand-fs /dev/mmcblk0 /dev/mmcblk0p1 2
-	exit 0
-fi
-
-# return exit status
-exit \$s
-EOF
+install -v -m 700 -o root -g root scripts/expand-rootfs.sh "$buildroot/etc/runonce.d/"
 
 # install helper script for easy boot kernel selection
 install -v -m755 -o root -g root scripts/selectkernel.sh "$buildroot/boot/"
