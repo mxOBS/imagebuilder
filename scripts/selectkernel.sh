@@ -54,7 +54,7 @@ read -p "Going to select ${kernels[$i]}. Press any key to proceed, or ctrl+c to 
 # create links
 set -e
 KERNELRELEASE="${kernels[$i]}"
-ln -sfv "zImage-$KERNELRELEASE" /boot/zImage
-ln -sfv "dtb-$KERNELRELEASE" /boot/dtb
-ln -sfv "initrd.img-$KERNELRELEASE" /boot/initrd
+ln -snfv "zImage-$KERNELRELEASE" /boot/zImage
+ln -snfv "dtbs/$KERNELRELEASE" /boot/dtb-dir
+ln -snfv "initrd.img-$KERNELRELEASE" /boot/initrd
 echo "Done"
