@@ -98,6 +98,7 @@ partprobe $LODEV
 printf "Creating new ext4 filesystem: "
 mkfs.ext4 -L rootfs ${LODEV}p1 1>/dev/null 2>/dev/null
 test $? != 0 && printf "Failed\n" && exit 1
+FS=ext4
 printf "Done\n"
 
 # mount filesystem
@@ -122,10 +123,13 @@ printf "Done\n"
 
 # install u-boot
 printf "Installing bootloader: "
+loader_installed=no
 if [ -e $MOUNT/boot/cubox-i-spl.bin ] && [ -e $MOUNT/boot/u-boot.img ]; then
 	# IMX6
 	dd if=$MOUNT/boot/cubox-i-spl.bin of=$LODEV bs=1K seek=1 1>/dev/null 2>/dev/null
 	dd if=$MOUNT/boot/u-boot.img of=$LODEV bs=1K seek=69 1>/dev/null 2>/dev/null
+
+	loader_installed=yes
 fi
 
 # A38X - Marvell U-Boot
@@ -173,6 +177,8 @@ echo "Booting ..."
 bootz \${kerneladdr} \${ramdiskaddr}:\${ramdisksize} \${fdtaddr}
 EOF
 	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $MOUNT/boot.script $MOUNT/boot.scr 1>/dev/null 2>/dev/null
+
+	loader_installed=yes
 fi
 
 # A38X Mainline U-Boot with Distro support
@@ -188,8 +194,10 @@ LABEL default
 	LINUX ../zImage
 	INITRD ../initrd
 	FDTDIR ../dtb-dir/
-	APPEND console=ttyS0,115200n8 root=UUID=$UUID rootwait
+	APPEND console=ttyS0,115200n8 root=UUID=$UUID rootfstype=$FS rootwait
 EOF
+
+	loader_installed=yes
 fi
 
 # GTA04
@@ -206,6 +214,22 @@ bootm \${loadaddr} - \${loadaddrfdt}
 EOF
     mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $MOUNT/boot/boot.script $MOUNT/boot/bootargs.scr 1>/dev/null 2>/dev/null
 fi
+
+# Generic
+if [ "x$loader_installed" != "xyes" ]; then
+	mkdir -p $MOUNT/boot/extlinux
+	cat > $MOUNT/boot/extlinux/extlinux.conf << EOF
+TIMEOUT 0
+LABEL default
+	LINUX ../../vmlinuz
+	INITRD ../../initrd.img
+	FDTDIR ../dtb-dir/
+	APPEND console=ttyS0,115200n8 root=UUID=$UUID rootfstype=auto rootwait
+EOF
+
+	loader_installed=yes
+fi
+
 printf "Done\n"
 
 # flush caches

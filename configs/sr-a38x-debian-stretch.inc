@@ -52,7 +52,7 @@ installpkg "$buildroot" command-not-found
 chroot_run "$buildroot" update-command-not-found
 
 # install automatic filesystem expander script
-installpkg "$buildroot" expand-fs runonce
+installpkg "$buildroot" expand-fs runonce parted
 install -v -m 700 -o root -g root scripts/expand-rootfs.sh "$buildroot/etc/runonce.d/"
 
 # install helper script for easy boot kernel selection
