@@ -47,7 +47,7 @@ installpkg "$buildroot" u-boot-clearfog linux-image-4.9.y-clearfog
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill
-installpkg "$buildroot" devmem2 usbutils pciutils i2c-tools mtd-utils
+installpkg "$buildroot" devmem2 usbutils pciutils i2c-tools mtd-utils ethtool
 installpkg "$buildroot" command-not-found
 chroot_run "$buildroot" update-command-not-found
 
