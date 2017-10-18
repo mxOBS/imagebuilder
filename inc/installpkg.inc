@@ -54,7 +54,9 @@ installpkg_local() {
 	chroot_run "$buildroot" dpkg -i $debs
 
 	# delete debs
-	rm -f "$buildroot/*.deb"
+	for deb in $debs; do
+		rm -f "$buildroot/$deb"
+	done
 
 	# unblock system services
 	rm -f "$buildroot/usr/sbin/policy-rc.d"
