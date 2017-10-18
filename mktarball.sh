@@ -79,6 +79,9 @@ add_repos $buildroot $distro
 # restore apt cache from previous runs
 restore_aptcache $buildroot $distro
 
+# update bootstrapped system to include security updates
+chroot_run $buildroot "apt-get -y upgrade"
+
 # install software selection
 install_base $buildroot $distro
 
