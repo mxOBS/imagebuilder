@@ -61,7 +61,7 @@ install_base() {
 	unset PKGS
 
 	# required packages for startup
-	PKGS=("${PKGS[@]}" "kernel-3.14.y-fslc-imx6-sr" "u-boot-cubox-i" "initramfs-tools")
+	PKGS=("${PKGS[@]}" "linux-image-3.14.y-fslc-imx6-sr" "u-boot-cubox-i" "initramfs-tools")
 
 	# i.MX6 specific base system
 	PKGS=("${PKGS[@]}" "irqbalance-imx" "bsp-cuboxi" "imx6-config" "runonce")
