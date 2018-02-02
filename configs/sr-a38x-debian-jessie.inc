@@ -42,6 +42,9 @@ addaptkey "$buildroot" https://repo.solid-build.xyz/debian/jessie/bsp-imx6/Relea
 # refresh repos
 chroot_run "$buildroot" apt-get update
 
+# apply security updates missed by debootstrap
+update "$buildroot"
+
 # install HW support packages
 installpkg "$buildroot" u-boot-clearfog linux-image-4.9.y-clearfog
 

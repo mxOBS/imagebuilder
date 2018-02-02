@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2017 Josua Mayer
+# Copyright (c) 2017-2018 Josua Mayer
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -43,8 +43,7 @@ addaptkey "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx6/Rele
 chroot_run "$buildroot" apt-get update
 
 # install HW support packages
-installpkg "$buildroot" bsp-cuboxi linux-image-3.14.y-fslc-imx6-sr
-installpkg_local u-boot-cubox-i_2013.10.1490279352-1_armhf.deb
+#installpkg "$buildroot" bsp-cuboxi linux-image-4.9.y-imx6-sr u-boot-imx6-sr
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill

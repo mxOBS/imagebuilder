@@ -129,12 +129,17 @@ if [ -e $MOUNT/boot/cubox-i-spl.bin ] && [ -e $MOUNT/boot/u-boot.img ]; then
 	dd if=$MOUNT/boot/cubox-i-spl.bin of=$LODEV bs=1K seek=1 1>/dev/null 2>/dev/null
 	dd if=$MOUNT/boot/u-boot.img of=$LODEV bs=1K seek=69 1>/dev/null 2>/dev/null
 
-	# This is the old U-Boot :( use uEnv.txt
-	cat > $MOUNT/boot/uEnv.txt << EOF
-mmcroot=/dev/mmcblk0p1 rootwait rw
-mmcargs=setenv bootargs console=ttymxc0,115200n8 console=tty root=UUID=$UUID quiet
-loadfdt=if test \${boottype} = mmc; then load mmc \${mmcdev}:\${mmcpart} \${fdt_addr} \${file_prefix}dtb/\${fdt_file}; else \${get_cmd} \${fdt_addr} \${fdt_file}; fi;
-bootloader-knows-about-dtb-subfolder=yes
+	# This is the new U-Boot :) use extlinux.conf
+	# create generic extlinux.conf pointing to standard symlinks
+	# Note: sadly not debian-standard!
+	install -d -o root -g root $MOUNT/boot/extlinux
+	cat > $MOUNT/boot/extlinux/extlinux.conf << EOF
+TIMEOUT 0
+LABEL default
+	LINUX ../zImage
+	INITRD ../initrd
+	FDTDIR ../dtb-dir/
+	APPEND console=ttymxc0,115200n8 root=UUID=$UUID rootfstype=$FS rootwait
 EOF
 	loader_installed=yes
 fi
