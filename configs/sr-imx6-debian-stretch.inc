@@ -43,7 +43,10 @@ addaptkey "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx6/Rele
 chroot_run "$buildroot" apt-get update
 
 # install HW support packages
-#installpkg "$buildroot" bsp-cuboxi linux-image-4.9.y-imx6-sr u-boot-imx6-sr
+installpkg "$buildroot" bsp-cuboxi linux-image-4.9.y-imx6-sr u-boot-imx6-sr
+
+# Framebuffer GPU userspace
+installpkg "$buildroot" imx-gpu-viv-fb eglinfo-fb gstreamer1.0-imx-fb
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill
