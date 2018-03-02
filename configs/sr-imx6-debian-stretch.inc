@@ -66,7 +66,7 @@ rm -fv "$buildroot"/etc/ssh/*_key{,.pub}
 chroot_run "$buildroot" runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reconfigure openssh-server
 
 # add default user
-adduser "$buildroot" debian debian /bin/bash sudo
+adduser "$buildroot" debian debian /bin/bash sudo video
 
 # set hostname
 sethostname "$buildroot" sr-imx6
