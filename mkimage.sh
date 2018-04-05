@@ -194,8 +194,8 @@ EOF
 fi
 
 # A38X Mainline U-Boot with Distro support
-if [ -e $MOUNT/boot/spl-clearfog.kwb ]; then
-	dd if=$MOUNT/boot/spl-clearfog.kwb of=$LODEV bs=512 seek=1 1>/dev/null 2>/dev/null
+if [ -e $MOUNT/boot/u-boot-spl-clearfog-pro-sdhc.kwb ]; then
+	dd if=$MOUNT/boot/u-boot-spl-clearfog-pro-sdhc.kwb of=$LODEV bs=512 seek=1 1>/dev/null 2>/dev/null
 
 	# create generic extlinux.conf pointing to standard symlinks
 	# Note: sadly not debian-standard!

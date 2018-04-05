@@ -62,5 +62,35 @@ installpkg_local() {
 	rm -f "$buildroot/usr/sbin/policy-rc.d"
 }
 
+# usage: <buildroot> <urls>
+installpkg_url() {
+	buildroot="$1"
+	shift 1
+
+	# loop through arguments
+	while [ 1 -le $# ]; do
+		url="$1"
+
+		# fetch deb
+		wget -O "$buildroot/installpkg_url.deb" "$url"
+
+		# block apt from running system services
+		echo "exit 101" > "$buildroot/usr/sbin/policy-rc.d"
+		chmod 777 "$buildroot/usr/sbin/policy-rc.d"
+
+		# actually install deb
+		chroot_run "$buildroot" dpkg -i installpkg_url.deb
+
+		# unblock system services
+		rm -f "$buildroot/usr/sbin/policy-rc.d"
+
+		# delete deb
+		rm "$buildroot/installpkg_url.deb"
+
+		# next
+		shift 1
+	done
+}
+
 # define required programs
-dependencies="rm chmod"
+dependencies="rm chmod wget"

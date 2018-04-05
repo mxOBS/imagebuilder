@@ -37,7 +37,7 @@ addrepo "$buildroot" sources.list http://security.debian.org/ stretch/updates ma
 
 # add BSP repo
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/stretch/bsp-imx6 ./
-addaptkey "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx6/Release.key
+installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx6/all/solidrun-keyring_2018.04.05_all.deb
 
 # refresh repos
 chroot_run "$buildroot" apt-get update
