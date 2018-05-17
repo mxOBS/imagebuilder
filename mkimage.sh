@@ -144,74 +144,6 @@ EOF
 	loader_installed=yes
 fi
 
-# A38X - Marvell U-Boot
-if [ -e $MOUNT/boot/u-boot-clearfog.mmc ]; then
-	dd if=$MOUNT/boot/u-boot-clearfog.mmc of=$LODEV bs=512 seek=1 1>/dev/null 2>/dev/null
-	cat > $MOUNT/boot.script << EOF
-# perform first-boot tasks
-if test "\${sr_firstboot}" != "done"; then
-	# save initial environment
-	setenv sr_firstboot done
-	saveenv
-fi
-
-# configure bootargs
-setenv bootargs 'root=/dev/mmcblk0p1 rootfstype=ext4 rootwait rw console=ttyS0,115200n8'
-
-# configure addresses
-kerneladdr=0x2000000
-fdtaddr=0x5F00000
-ramdiskaddr=0x6000000
-setenv fdt_high 0x07a12000
-setenv initrd_high 0xFFFFFFFF
-
-# make sure fdt_file is set
-if test "\${fdt_file}" = "\${fdt_file}"; then
-	# fall back to Clearfog Pro
-	fdt_file=armada-388-clearfog-pro.dtb
-fi
-
-# load DTB
-echo "Loading dtb/\${fdt_file}"
-ext4load mmc 0:1 \${fdtaddr} /boot/dtb/\${fdt_file}
-
-# load Kernel
-echo "Loading zImage ..."
-ext4load mmc 0:1 \${kerneladdr} /boot/zImage
-
-# load Ramdisk
-echo "Loading initrd ..."
-ext4load mmc 0:1 \${ramdiskaddr} /boot/initrd
-ramdisksize=0x\${filesize}
-
-# boot
-echo "Booting ..."
-bootz \${kerneladdr} \${ramdiskaddr}:\${ramdisksize} \${fdtaddr}
-EOF
-	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $MOUNT/boot.script $MOUNT/boot.scr 1>/dev/null 2>/dev/null
-
-	loader_installed=yes
-fi
-
-# A38X Mainline U-Boot with Distro support
-if [ -e $MOUNT/boot/u-boot-spl-clearfog-pro-sdhc.kwb ]; then
-	dd if=$MOUNT/boot/u-boot-spl-clearfog-pro-sdhc.kwb of=$LODEV bs=512 seek=1 1>/dev/null 2>/dev/null
-
-	# create generic extlinux.conf pointing to standard symlinks
-	# Note: sadly not debian-standard!
-	install -d -o root -g root $MOUNT/boot/extlinux
-	cat > $MOUNT/boot/extlinux/extlinux.conf << EOF
-TIMEOUT 0
-LABEL default
-	LINUX ../zImage
-	INITRD ../initrd
-	FDTDIR ../dtb-dir/
-	APPEND console=ttyS0,115200n8 root=UUID=$UUID rootfstype=$FS rootwait
-EOF
-
-	loader_installed=yes
-fi
-
 # GTA04
 if [ -h $MOUNT/boot/uImage ] && [[ $(readlink $MOUNT/boot/uImage) = uImage-*-letux ]]; then
 	# boot script because original one does not look for DTB in /boot/dtb/
@@ -227,16 +159,16 @@ EOF
     mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $MOUNT/boot/boot.script $MOUNT/boot/bootargs.scr 1>/dev/null 2>/dev/null
 fi
 
-# Generic
+# Generic (zImage - not Debian)
 if [ "x$loader_installed" != "xyes" ]; then
 	mkdir -p $MOUNT/boot/extlinux
 	cat > $MOUNT/boot/extlinux/extlinux.conf << EOF
 TIMEOUT 0
 LABEL default
-	LINUX ../../vmlinuz
-	INITRD ../../initrd.img
+	LINUX ../zImage
+	INITRD ../initrd
 	FDTDIR ../dtb-dir/
-	APPEND console=ttyS0,115200n8 root=UUID=$UUID rootfstype=auto rootwait
+	APPEND root=UUID=$UUID rootfstype=auto rootwait
 EOF
 
 	loader_installed=yes
