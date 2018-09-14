@@ -43,7 +43,7 @@ bootstrap() {
 
 	# create tarball of packages if it doesnt exist yet
 	if [ ! -e $distro.bootstrap.tar ]; then
-		debootstrap --no-check-gpg --arch=$arch $INCLUDE_PACKAGES_ARG --make-tarball=$PWD/$distro.bootstrap.tar $distro $buildroot $mirror
+		debootstrap --no-check-gpg --arch=$arch $INCLUDE_PACKAGES_ARG --make-tarball=$PWD/$distro.bootstrap.tar --variant=minbase $distro $buildroot $mirror
 	fi
 
 	# on foreign architectures, run second stage manually
