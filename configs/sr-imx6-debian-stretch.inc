@@ -23,11 +23,7 @@
 # This is the actual cookbook
 
 # bootstrap a debian system
-bootstrap "$buildroot" stretch armhf apt-transport-https ca-certificates initramfs-tools locales
-
-# Configure Defaults (before any packages, so they are taken into account by post scripts)
-# enable fsck on every boot
-sed -i "s;^.*FSCKFIX=.*$;FSCKFIX=yes;g" /etc/default/rcS
+bootstrap "$buildroot" stretch armhf apt-transport-https ca-certificates locales systemd-sysv dracut
 
 # add debian repos
 deleterepos "$buildroot" sources.list
@@ -37,13 +33,23 @@ addrepo "$buildroot" sources.list http://security.debian.org/ stretch/updates ma
 
 # add BSP repo
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/stretch/bsp-imx6 ./
-addaptkey "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx6/Release.key
+installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx6/all/solidrun-keyring_2018.04.05_all.deb
+
+# mount /dev/root from fstab
+# Note: breaks flash-kernel package which expects a more meaningful value to include in initrd!
+# Note: replaced with uuid by mkimage
+cat > "$buildroot/etc/fstab" << EOF
+/dev/root / auto defaults 0 0
+EOF
 
 # refresh repos
 chroot_run "$buildroot" apt-get update
 
+# apply security updates missed by debootstrap
+update "$buildroot"
+
 # install HW support packages
-installpkg "$buildroot" bsp-cuboxi linux-image-4.9.y-imx6-sr u-boot-imx6-sr
+installpkg "$buildroot" bsp-cuboxi linux-image-4.9.y-imx6-sr
 
 # Framebuffer GPU userspace
 installpkg "$buildroot" imx-gpu-viv-fb eglinfo-fb gstreamer1.0-imx-fb
@@ -53,6 +59,9 @@ installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmi
 installpkg "$buildroot" devmem2 usbutils pciutils i2c-tools mtd-utils
 installpkg "$buildroot" command-not-found
 chroot_run "$buildroot" update-command-not-found
+
+# install X11 GUI
+#installpkg "$buildroot" xserver-xorg-core xinit imx-gpu-viv-x11 xserver-xorg-video-imx-viv
 
 # install automatic filesystem expander script
 installpkg "$buildroot" expand-fs runonce parted
@@ -66,7 +75,7 @@ rm -fv "$buildroot"/etc/ssh/*_key{,.pub}
 chroot_run "$buildroot" runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reconfigure openssh-server
 
 # add default user
-adduser "$buildroot" debian debian /bin/bash sudo video
+adduser "$buildroot" debian debian /bin/bash video sudo
 
 # set hostname
 sethostname "$buildroot" sr-imx6
@@ -76,12 +85,6 @@ chroot_run "$buildroot" systemctl set-default multi-user.target
 
 # spawn getty on serial port
 chroot_run "$buildroot" systemctl enable serial-getty@ttymxc0.service
-
-# mount /dev/root from fstab
-# Note: breaks flash-kernel package which expects a more meaningful value to include in initrd!
-cat > "$buildroot/etc/fstab" << EOF
-/dev/root / auto defaults 0 0
-EOF
 
 # remove traces of build-system
 cleanup "$buildroot"
