@@ -23,7 +23,7 @@
 # This is the actual cookbook
 
 # bootstrap a debian system
-bootstrap "$buildroot" stretch armhf apt-transport-https ca-certificates locales systemd-sysv initramfs-tools
+bootstrap "$buildroot" stretch armhf apt-transport-https ca-certificates locales systemd-sysv initramfs-tools busybox
 
 # add debian repos
 deleterepos "$buildroot" sources.list
