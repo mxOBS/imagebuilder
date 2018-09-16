@@ -23,13 +23,15 @@
 # This is the actual cookbook
 
 # bootstrap a debian system
-bootstrap "$buildroot" stretch armhf apt-transport-https ca-certificates locales systemd-sysv dracut
+bootstrap "$buildroot" stretch armhf apt-transport-https ca-certificates locales systemd-sysv initramfs-tools
 
 # add debian repos
 deleterepos "$buildroot" sources.list
-addrepo "$buildroot" sources.list http://httpredir.debian.org/debian stretch main
-addrepo "$buildroot" sources.list http://httpredir.debian.org/debian stretch-updates main
-addrepo "$buildroot" sources.list http://security.debian.org/ stretch/updates main
+addrepo "$buildroot" sources.list http://httpredir.debian.org/debian stretch main non-free
+addrepo "$buildroot" sources.list http://httpredir.debian.org/debian stretch-updates main non-free
+addrepo "$buildroot" sources.list http://security.debian.org/ stretch/updates main non-free
+# backports
+addrepo "$buildroot" sources.list http://ftp.debian.org/debian stretch-backports main non-free
 
 # add BSP repo
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/stretch/bsp-imx6 ./
@@ -50,18 +52,21 @@ update "$buildroot"
 
 # install HW support packages
 installpkg "$buildroot" bsp-cuboxi linux-image-4.9.y-imx6-sr
+installpkg "$buildroot" -t stretch-backports firmware-misc-nonfree
+
+# install a bunch of useful applications
+installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill devmem2 usbutils pciutils i2c-tools mtd-utils command-not-found
+chroot_run "$buildroot" apt-file update
+chroot_run "$buildroot" update-command-not-found
 
 # Framebuffer GPU userspace
 installpkg "$buildroot" imx-gpu-viv-fb eglinfo-fb gstreamer1.0-imx-fb
 
-# install a bunch of useful applications
-installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill
-installpkg "$buildroot" devmem2 usbutils pciutils i2c-tools mtd-utils
-installpkg "$buildroot" command-not-found
-chroot_run "$buildroot" update-command-not-found
-
 # install X11 GUI
 #installpkg "$buildroot" xserver-xorg-core xinit imx-gpu-viv-x11 xserver-xorg-video-imx-viv
+
+# multimedia
+installpkg "$buildroot" gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-tools alsa-utils
 
 # install automatic filesystem expander script
 installpkg "$buildroot" expand-fs runonce parted
