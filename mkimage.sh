@@ -134,6 +134,11 @@ umount ${LODEV}p1
 rmdir $MOUNT
 MOUNT=
 
+printf "Patching filesystem UUID to match fstab: "    
+tune2fs -U $FSUUID ${LODEV}p1
+test $? != 0 && exit 1
+printf "Done\n
+
 # detach loopback device
 losetup -d $LODEV
 LODEV=

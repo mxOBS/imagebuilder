@@ -27,8 +27,10 @@ chroot_run() {
 	cmd="$@"
 
 	qemu_setup $buildroot
-	echo $cmd
-	chroot "$buildroot" $cmd
+	echo "$cmd" > "$buildroot/cmd.sh"
+	cat "$buildroot/cmd.sh"
+	chroot "$buildroot" /bin/sh /cmd.sh
+	rm -f "$buildroot/cmd.sh"
 	qemu_remove $buildroot
 }
 
