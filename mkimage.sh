@@ -113,7 +113,7 @@ test $? != 0 && exit 1
 printf "Done\n"
 
 # find rootfs uuid
-FSUUID=$(grep -o -E '^UUID=[a-zA-Z0-9-]+[ \t]+/[ \t]+' "$buildroot/etc/fstab" | sed -r 's;^UUID=([a-z0-9-]+).*$;\1;g' | head -1)
+FSUUID=$(grep -o -E '^UUID=[a-zA-Z0-9-]+[ 	]+/[ 	]+.*' "$MOUNT/etc/fstab" | sed -r 's;^UUID=([a-z0-9-]+).*$;\1;g' | head -1)
 if [ -z "$FSUUID" ]; then
 	FSUUID=$(lsblk -n -o UUID ${LODEV}p1)
 fi
@@ -134,10 +134,10 @@ umount ${LODEV}p1
 rmdir $MOUNT
 MOUNT=
 
-printf "Patching filesystem UUID to match fstab: "    
+printf "Patching filesystem UUID=$FSUUID to match fstab: "    
 tune2fs -U $FSUUID ${LODEV}p1
 test $? != 0 && exit 1
-printf "Done\n
+printf "Done\n"
 
 # detach loopback device
 losetup -d $LODEV

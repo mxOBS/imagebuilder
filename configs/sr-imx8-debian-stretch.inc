@@ -50,8 +50,9 @@ chroot_run "$buildroot" apt-get update
 update "$buildroot"
 
 # install HW support packages
-installpkg "$buildroot" flash-kernel linux-image-4.9.y-imx8-sr firmware-atheros bsp-solidrun-imx8
+installpkg "$buildroot" flash-kernel runonce expand-fs linux-image-4.9.y-imx8-sr firmware-atheros bsp-solidrun-imx8
 install -v -m644 -o root -g root scripts/flash-kernel.db "$buildroot/etc/flash-kernel/db"
+install -v -m700 -o root -g root scripts/expand-rootfs.sh "$buildroot/etc/runonce.d/"
 
 # make bootable
 sed -i "s;quiet;log_level=7;g" "$buildroot/etc/default/flash-kernel"
