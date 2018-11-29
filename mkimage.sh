@@ -112,54 +112,17 @@ tar -C $MOUNT --numeric-owner -xpf $archive
 test $? != 0 && exit 1
 printf "Done\n"
 
-# find filesystem uuid
-UUID=$(lsblk -n -o UUID ${LODEV}p1)
+# find rootfs uuid
+FSUUID=$(grep -o -E '^UUID=[a-zA-Z0-9-]+[ \t]+/[ \t]+' "$buildroot/etc/fstab" | sed -r 's;^UUID=([a-z0-9-]+).*$;\1;g' | head -1)
+if [ -z "$FSUUID" ]; then
+	FSUUID=$(lsblk -n -o UUID ${LODEV}p1)
+fi
 
 # patch fstab replacing generic /dev/root name if any
 printf "Patching fstab with actual filesystem UUID: "
-sed -i "s;^/dev/root;UUID=$UUID;g" $MOUNT/etc/fstab
+sed -i "s;^/dev/root;UUID=$FSUUID;g" $MOUNT/etc/fstab
 test $? != 0 && exit 1
 printf "Done\n"
-
-# install u-boot
-printf "Installing bootloader: "
-loader_installed=no
-
-# GTA04
-if [ -h $MOUNT/boot/uImage ] && [[ $(readlink $MOUNT/boot/uImage) = uImage-*-letux ]]; then
-	# boot script because original one does not look for DTB in /boot/dtb/
-	cat > $MOUNT/boot/boot.script << EOF
-i2c dev 0
-mmc rescan 0
-ext4load mmc 0:1 \${loadaddr} /boot/uImage
-ext4load mmc 0:1 \${loadaddrfdt} /boot/dtb/\${devicetree}.dtb 
-# TODO: initrd
-setenv bootargs console=ttyO2,115200n8 root=/dev/mmcblk0p1 rootfstype=ext4 rootwait
-bootm \${loadaddr} - \${loadaddrfdt}
-EOF
-    mkimage -A arm -O linux -T script -C none -a 0 -e 0 -d $MOUNT/boot/boot.script $MOUNT/boot/bootargs.scr 1>/dev/null 2>/dev/null
-fi
-
-# Generic (zImage - not Debian)
-if [ "x$loader_installed" != "xyes" ]; then
-	mkdir -p $MOUNT/boot/extlinux
-	cat > $MOUNT/boot/extlinux/extlinux.conf << EOF
-TIMEOUT 0
-LABEL default
-	LINUX ../zImage
-	INITRD ../initrd
-	FDTDIR ../dtb-dir/
-	APPEND root=UUID=$UUID rootfstype=auto rootwait
-EOF
-
-	loader_installed=yes
-fi
-
-if [ "x$loader_installed" = "xyes" ]; then
-	printf "Done\n"
-else
-	printf "Skipped\n"
-fi
 
 # flush caches
 printf "Flushing kernel filesystem caches: "
