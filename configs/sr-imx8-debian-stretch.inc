@@ -50,13 +50,8 @@ chroot_run "$buildroot" apt-get update
 update "$buildroot"
 
 # install HW support packages
-installpkg "$buildroot" flash-kernel runonce expand-fs linux-image-4.9.y-imx8-sr firmware-atheros bsp-solidrun-imx8
-install -v -m644 -o root -g root scripts/flash-kernel.db "$buildroot/etc/flash-kernel/db"
+installpkg "$buildroot" flash-kernel runonce expand-fs parted linux-image-4.9.y-imx8-sr firmware-atheros bsp-solidrun-imx8
 install -v -m700 -o root -g root scripts/expand-rootfs.sh "$buildroot/etc/runonce.d/"
-
-# make bootable
-sed -i "s;quiet;log_level=7;g" "$buildroot/etc/default/flash-kernel"
-chroot_run "$buildroot" env FK_MACHINE=\"SolidRun i.MX8MQ HummingBoard Pulse\" flash-kernel
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server nano psmisc ntfs-3g iw rfkill usbutils pciutils i2c-tools mtd-utils command-not-found
@@ -81,6 +76,13 @@ chroot_run "$buildroot" systemctl enable serial-getty@ttymxc0.service
 
 # configure network
 install -v -m 644 -o root -g root scripts/interface-eth0 "$buildroot/etc/network/interfaces.d/eth0"
+
+# enable watchdog
+sed -i "s;^#?RuntimeWatchdogSec=.*;RuntimeWatchdogSec=60;g" "$buildroot/etc/systemd/system.conf"
+
+# make bootable
+sed -i "s;quiet;log_level=7 net.ifnames=0;g" "$buildroot/etc/default/flash-kernel"
+chroot_run "$buildroot" env FK_MACHINE=\"SolidRun i.MX8MQ HummingBoard Pulse\" flash-kernel
 
 # remove traces of build-system
 cleanup "$buildroot"
