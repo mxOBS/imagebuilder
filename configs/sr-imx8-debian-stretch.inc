@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2017-2018 Josua Mayer
+# Copyright (c) 2017-2019 Josua Mayer
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ addrepo "$buildroot" sources.list http://ftp.debian.org/debian stretch-backports
 
 # add BSP repo
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/stretch/bsp-imx8 ./
-installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx8/all/solidrun-keyring_2018.10.10_all.deb
+installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx8/all/solidrun-keyring_2019.02.18_all.deb
 
 # full fstab with uuid and filesystem already decided
 FSUUID=$(uuidgen)
@@ -50,7 +50,7 @@ chroot_run "$buildroot" apt-get update
 update "$buildroot"
 
 # install HW support packages
-installpkg "$buildroot" flash-kernel runonce expand-fs parted linux-image-4.9.y-imx8-sr firmware-atheros bsp-solidrun-imx8
+installpkg "$buildroot" flash-kernel runonce expand-fs parted linux-image-4.14.y-imx8-sr firmware-atheros bsp-solidrun-imx8
 install -v -m700 -o root -g root scripts/expand-rootfs.sh "$buildroot/etc/runonce.d/"
 
 # install a bunch of useful applications
@@ -83,6 +83,7 @@ sed -i "s;^#?RuntimeWatchdogSec=.*;RuntimeWatchdogSec=60;g" "$buildroot/etc/syst
 # make bootable
 sed -i "s;quiet;log_level=7 net.ifnames=0;g" "$buildroot/etc/default/flash-kernel"
 chroot_run "$buildroot" env FK_MACHINE=\"SolidRun i.MX8MQ HummingBoard Pulse\" flash-kernel
+chroot_run "$buildroot" env FK_MACHINE=\"SolidRun i.MX8MQ CuBox Pulse\" flash-kernel
 
 # remove traces of build-system
 cleanup "$buildroot"
