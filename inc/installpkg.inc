@@ -48,7 +48,7 @@ installpkg_local() {
 	chmod 777 "$buildroot/usr/sbin/policy-rc.d"
 
 	# copy debs to target system
-	cp -L $debs "$buildroot/"
+	cd data; cp -L $debs "../$buildroot/"; cd ..
 
 	# actually install debs
 	chroot_run "$buildroot" dpkg -i $debs

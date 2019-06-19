@@ -21,7 +21,7 @@
 #
 
 # This is the actual cookbook
-
+export FK_MACHINE=none
 # bootstrap a debian system
 bootstrap "$buildroot" buster arm64 apt-transport-https ca-certificates locales systemd-sysv initramfs-tools busybox
 
@@ -49,7 +49,8 @@ update "$buildroot"
 
 # install HW support packages
 installpkg "$buildroot" flash-kernel runonce expand-fs parted linux-image-arm64 firmware-atheros bsp-solidrun-8040
-install -v -m700 -o root -g root scripts/expand-rootfs.sh "$buildroot/etc/runonce.d/"
+install -v -m700 -o root -g root data/expand-rootfs.sh "$buildroot/etc/runonce.d/"
+install -v -m644 -o root -g root /home/josua/Downloads/armada-8040-clearfog-gt-8k.dtb "$buildroot/etc/flash-kernel/dtbs/
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server nano psmisc ntfs-3g iw rfkill usbutils pciutils i2c-tools mtd-utils command-not-found
@@ -70,11 +71,11 @@ sethostname "$buildroot" sr-8040
 chroot_run "$buildroot" systemctl set-default multi-user.target
 
 # spawn getty on serial port
-chroot_run "$buildroot" systemctl enable serial-getty@ttymxc0.service
+chroot_run "$buildroot" systemctl enable serial-getty@ttyS0.service
 
 # configure network
-install -v -m 644 -o root -g root scripts/interface-eth0 "$buildroot/etc/network/interfaces.d/eth0"
-install -v -m 644 -o root -g root scripts/interface-eth1 "$buildroot/etc/network/interfaces.d/eth1"
+install -v -m 644 -o root -g root data/interface-eth0 "$buildroot/etc/network/interfaces.d/eth0"
+install -v -m 644 -o root -g root data/interface-eth1 "$buildroot/etc/network/interfaces.d/eth1"
 
 # enable watchdog
 sed -i "s;^#?RuntimeWatchdogSec=.*;RuntimeWatchdogSec=60;g" "$buildroot/etc/systemd/system.conf"

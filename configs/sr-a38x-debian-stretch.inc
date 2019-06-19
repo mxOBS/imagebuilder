@@ -53,10 +53,10 @@ chroot_run "$buildroot" update-command-not-found
 
 # install automatic filesystem expander script
 installpkg "$buildroot" expand-fs runonce parted
-install -v -m 700 -o root -g root scripts/expand-rootfs.sh "$buildroot/etc/runonce.d/"
+install -v -m 700 -o root -g root data/expand-rootfs.sh "$buildroot/etc/runonce.d/"
 
 # install helper script for easy boot kernel selection
-install -v -m755 -o root -g root scripts/selectkernel.sh "$buildroot/boot/"
+install -v -m755 -o root -g root data/selectkernel.sh "$buildroot/boot/"
 
 # for security reasons recreate the ssh keys on first boot
 rm -fv "$buildroot"/etc/ssh/*_key{,.pub}

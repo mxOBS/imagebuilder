@@ -49,7 +49,7 @@ update "$buildroot"
 
 # install HW support packages
 installpkg "$buildroot" flash-kernel runonce expand-fs parted linux-image-4.14.y-imx8-sr firmware-atheros bsp-solidrun-imx8
-install -v -m700 -o root -g root scripts/expand-rootfs.sh "$buildroot/etc/runonce.d/"
+install -v -m700 -o root -g root data/expand-rootfs.sh "$buildroot/etc/runonce.d/"
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server nano psmisc ntfs-3g iw rfkill usbutils pciutils i2c-tools mtd-utils command-not-found
@@ -73,7 +73,7 @@ chroot_run "$buildroot" systemctl set-default multi-user.target
 chroot_run "$buildroot" systemctl enable serial-getty@ttymxc0.service
 
 # configure network
-install -v -m 644 -o root -g root scripts/interface-eth0 "$buildroot/etc/network/interfaces.d/eth0"
+install -v -m 644 -o root -g root data/interface-eth0 "$buildroot/etc/network/interfaces.d/eth0"
 
 # enable watchdog
 sed -i "s;^#?RuntimeWatchdogSec=.*;RuntimeWatchdogSec=60;g" "$buildroot/etc/systemd/system.conf"

@@ -73,7 +73,7 @@ exit \$s
 EOF
 
 # install helper script for easy boot kernel selection
-install -v -m755 -o root -g root scripts/selectkernel.sh "$buildroot/boot/"
+install -v -m755 -o root -g root data/selectkernel.sh "$buildroot/boot/"
 
 # for security reasons recreate the ssh keys on first boot
 rm -fv "$buildroot"/etc/ssh/*_key{,.pub}
