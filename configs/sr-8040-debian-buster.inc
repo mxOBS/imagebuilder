@@ -48,9 +48,9 @@ chroot_run "$buildroot" apt-get update
 update "$buildroot"
 
 # install HW support packages
-installpkg "$buildroot" flash-kernel runonce expand-fs parted linux-image-arm64 firmware-atheros bsp-solidrun-8040
+installpkg "$buildroot" flash-kernel runonce expand-fs parted linux-image-5.1.0-trunk-arm64-unsigned linux-headers-5.1.0-trunk-arm64 firmware-atheros bsp-solidrun-8040
 install -v -m700 -o root -g root data/expand-rootfs.sh "$buildroot/etc/runonce.d/"
-install -v -m644 -o root -g root /home/josua/Downloads/armada-8040-clearfog-gt-8k.dtb "$buildroot/etc/flash-kernel/dtbs/
+install -v -m644 -o root -g root /home/josua/Downloads/armada-8040-clearfog-gt-8k.dtb "$buildroot/etc/flash-kernel/dtbs/"
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server nano psmisc ntfs-3g iw rfkill usbutils pciutils i2c-tools mtd-utils command-not-found
