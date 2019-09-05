@@ -21,6 +21,16 @@
 # THE SOFTWARE.
 # 
 
+# functions
+cpio_create_at() {
+	local root
+	root="$1"
+
+	cd "$root"
+	cpio -H newc -o
+	return $?
+}
+
 # args
 if [ $# != 2 ]; then
 	echo "Usage: $0 <system-archive> <size_in_megabytes>"
@@ -122,6 +132,15 @@ fi
 printf "Patching fstab with actual filesystem UUID: "
 sed -i "s;^/dev/root;UUID=$FSUUID;g" $MOUNT/etc/fstab
 test $? != 0 && exit 1
+printf "Done\n"
+
+# patch debian initramfs with default root device
+printf "Patching initramfs with actual filesystem UUID: "
+mkdir -p "$MOUNT/tmp/rd/conf/conf.d"
+printf "ROOT=\"%s\"\n" "UUID=$FSUUID" > "$MOUNT/tmp/rd/conf/conf.d/default_root"
+echo conf/conf.d/default_root | cpio_create_at "$MOUNT/tmp/rd" 2>/dev/null | gzip >> "$MOUNT/boot/initrd"
+test $? != 0 && exit 1
+rm -rf "$MOUNT/tmp/rd"
 printf "Done\n"
 
 # flush caches
