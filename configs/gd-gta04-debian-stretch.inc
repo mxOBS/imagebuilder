@@ -41,7 +41,7 @@ chroot_run "$buildroot" apt-get update
 installpkg "$buildroot" linux-image-armmp firmware-libertas
 
 # install a bunch of useful applications
-installpkg "$buildroot" sudo openssh-server nano mtd-utils psmisc ntfs-3g iw locales command-not-found
+installpkg "$buildroot" sudo openssh-server mtd-utils rfkill psmisc nano ntfs-3g iw locales command-not-found
 chroot_run "$buildroot" update-command-not-found
 
 # add default user

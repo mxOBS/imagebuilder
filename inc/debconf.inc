@@ -21,18 +21,12 @@
 #
 
 # usage: <buildroot> <cmd>
-chroot_run() {
-	buildroot=$1
+debconf_set_selection() {
+	buildroot="$1"
 	shift
-	cmd="$@"
+	selection="$@"
 
-	qemu_setup $buildroot
-	echo "export FK_MACHINE=none" > "$buildroot/cmd.sh"
-	echo "$cmd" >> "$buildroot/cmd.sh"
-	cat "$buildroot/cmd.sh"
-	chroot "$buildroot" /bin/sh /cmd.sh
-	rm -f "$buildroot/cmd.sh"
-	qemu_remove $buildroot
+	echo $selection | chroot_run "$buildroot" debconf-set-selections -v
 }
 
 # define required programs

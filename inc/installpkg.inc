@@ -51,12 +51,10 @@ installpkg_local() {
 	cd data; cp -L $debs "../$buildroot/"; cd ..
 
 	# actually install debs
-	chroot_run "$buildroot" dpkg -i $debs
+	chroot_run "$buildroot" dpkg -i /*.deb
 
 	# delete debs
-	for deb in $debs; do
-		rm -f "$buildroot/$deb"
-	done
+	rm -f "$buildroot/"/*.deb
 
 	# unblock system services
 	rm -f "$buildroot/usr/sbin/policy-rc.d"

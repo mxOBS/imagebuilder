@@ -31,18 +31,29 @@ addrepo "$buildroot" sources.list http://httpredir.debian.org/debian testing mai
 addrepo "$buildroot" sources.list http://httpredir.debian.org/debian testing-updates main non-free
 addrepo "$buildroot" sources.list http://security.debian.org/ testing/updates main non-free
 
-# add bsp repo
-#addrepo "$buildroot" sources.list.d/goldelico.list [trusted=yes] http://10.80.39.247/gta04 /
-
 # refresh repos
 chroot_run "$buildroot" apt-get update
 
+# debconf preseed
+debconf_set_selection "$buildroot" locales locales/default_environment_locale select en_US.UTF-8
+debconf_set_selection "$buildroot" locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8
+debconf_set_selection "$buildroot" localepurge localepurge/nopurge multiselect en, en_US.UTF-8
+debconf_set_selection "$buildroot" localepurge localepurge/use-dpkg-feature boolean true
+debconf_set_selection "$buildroot" localepurge localepurge/mandelete boolean true
+
+# disable installing additional packages
+cat > "$buildroot/etc/apt/apt.conf.d/99tiny" << EOF
+APT::Install-Recommends "0";
+APT::Install-Suggests "0";
+EOF
+
 # install HW support packages
-installpkg "$buildroot" linux-image-armmp firmware-libertas
+installpkg "$buildroot" linux-image-armmp firmware-libertas firmware-ti-connectivity mtd-utils
 
 # install a bunch of useful applications
-installpkg "$buildroot" sudo openssh-server nano mtd-utils psmisc ntfs-3g iw locales command-not-found
-chroot_run "$buildroot" update-command-not-found
+installpkg "$buildroot" sudo openssh-server mtd-utils rfkill psmisc nano iw locales localepurge
+# TODO: how to trigger first run of localepurge if USE_DPKG was set? saves 30MB
+chroot_run "$buildroot" localepurge
 
 # add default user
 adduser "$buildroot" debian debian /bin/bash sudo
@@ -54,7 +65,7 @@ sethostname "$buildroot" gta04
 chroot_run "$buildroot" systemctl set-default multi-user.target
 
 # spawn getty on serial port
-chroot_run "$buildroot" systemctl enable serial-getty@ttyS0.service
+chroot_run "$buildroot" systemctl enable serial-getty@ttyO2.service
 
 # remove traces of build-system
 cleanup "$buildroot"

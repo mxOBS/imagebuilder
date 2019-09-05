@@ -22,6 +22,8 @@
 
 # usage: <buildroot> <distro-codename> <packages>
 bootstrap() {
+	local ret
+
 	buildroot=$1
 	distro=$2
 	arch=$3
@@ -49,16 +51,27 @@ bootstrap() {
 	# on foreign architectures, run second stage manually
 	if [[ `uname -m` = arm* ]]; then
 		debootstrap --no-check-gpg --arch=$arch --unpack-tarball=$PWD/$distro.bootstrap.tar $INCLUDE_PACKAGES_ARG $distro $buildroot $mirror
+		ret=$?
 	else
 		# first stage
-		debootstrap --no-check-gpg --foreign --arch=$arch --unpack-tarball=$PWD/$distro.bootstrap.tar $INCLUDE_PACKAGES_ARG $distro $buildroot $mirror
+		mkdir $buildroot; tar -C $buildroot -xf $PWD/$distro.bootstrap.tar
+		debootstrap --no-check-gpg --foreign --arch=$arch $INCLUDE_PACKAGES_ARG $distro $buildroot $mirror
+		ret=$?
 
-		# second stage in chroot
-		chroot_run $buildroot "/bin/bash /debootstrap/debootstrap --second-stage"
+		if [ $ret -eq 0 ]; then
+			# second stage in chroot
+			chroot_run $buildroot "/bin/bash /debootstrap/debootstrap --second-stage"
+			ret=$?
 
-		# third stage
-		# copy resolv.conf
-		cp /etc/resolv.conf $buildroot/etc/
+			if [ $ret -eq 0 ]; then
+				# third stage
+				# copy resolv.conf
+				cp /etc/resolv.conf $buildroot/etc/
+			fi
+		fi
+	fi
+	if [ $ret -ne 0 ]; then
+		return $ret
 	fi
 
 	# apply permission hacks
