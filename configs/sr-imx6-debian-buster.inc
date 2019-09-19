@@ -53,9 +53,18 @@ update "$buildroot"
 installpkg "$buildroot" bsp-solidrun-imx6 linux-image-4.9.y-imx6-sr
 
 # install a bunch of useful applications
-installpkg "$buildroot" sudo openssh-server connman nano psmisc ntfs-3g iw rfkill devmem2 usbutils pciutils i2c-tools mtd-utils command-not-found alsa-utils
+installpkg "$buildroot" sudo openssh-server connman nano psmisc ntfs-3g iw rfkill devmem2 usbutils pciutils i2c-tools mtd-utils command-not-found alsa-utils wget
 chroot_run "$buildroot" apt-file update
 chroot_run "$buildroot" update-command-not-found
+
+# generate additional entropy to speed up /dev/urandom and reduce boot time
+installpkg "$buildroot" haveged
+
+# install gpu userspace
+installpkg "$buildroot" imx-gpu-viv imx-gpu-viv-fb eglinfo-fb
+
+# install multimedia userspace
+installpkg "$buildroot" gstreamer1.0-imx-fb gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-alsa gstreamer1.0-tools
 
 # install automatic filesystem expander script
 installpkg "$buildroot" expand-fs runonce parted
@@ -66,7 +75,7 @@ rm -fv "$buildroot"/etc/ssh/*_key{,.pub}
 chroot_run "$buildroot" runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reconfigure openssh-server
 
 # add default user
-adduser "$buildroot" debian debian /bin/bash video sudo
+adduser "$buildroot" debian debian /bin/bash audio sudo video
 
 # set hostname
 sethostname "$buildroot" sr-imx6
@@ -78,11 +87,11 @@ chroot_run "$buildroot" systemctl set-default multi-user.target
 chroot_run "$buildroot" systemctl enable serial-getty@ttymxc0.service
 
 # enable watchdog
-sed -i "s;^#?RuntimeWatchdogSec=.*;RuntimeWatchdogSec=60;g" "$buildroot/etc/systemd/system.conf"
+sed -E -i "s;^#?RuntimeWatchdogSec=.*$;RuntimeWatchdogSec=60;g" "$buildroot/etc/systemd/system.conf"
 
 # make bootable (using debian flash-image)
-sed -i "s;quiet;log_level=7 net.ifnames=0;g" "$buildroot/etc/default/flash-kernel"
 installpkg "$buildroot" flash-kernel
+sed -E -i "s;^LINUX_KERNEL_CMDLINE=.*$;LINUX_KERNEL_CMDLINE=\"log_level=7 net.ifnames=0\";g" "$buildroot/etc/default/flash-kernel"
 for dev in \
 	"SolidRun Cubox-i Dual/Quad" \
 	"SolidRun Cubox-i Dual/Quad (1.5som)" \
