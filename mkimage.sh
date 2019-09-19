@@ -45,7 +45,7 @@ if [ "$UID" != 0 ]; then
 	exit 1
 fi
 
-progs="dd losetup fdisk tar mkfs.ext4 qemu-img mkimage partprobe"
+progs="dd losetup fdisk fsck.ext4 tar mkfs.ext4 qemu-img mkimage partprobe"
 for prog in $progs; do
 	which $prog 1>/dev/null 2>/dev/null
 	if [ $? != 0 ]; then
@@ -152,6 +152,11 @@ printf "Done\n"
 umount ${LODEV}p1
 rmdir $MOUNT
 MOUNT=
+
+printf "Checking filesystem: "
+fsck.ext4 -f ${LODEV}p1
+test $? != 0 && exit 1
+printf "Done\n"
 
 printf "Patching filesystem UUID=$FSUUID to match fstab: "    
 tune2fs -U $FSUUID ${LODEV}p1
