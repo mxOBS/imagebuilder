@@ -23,19 +23,20 @@
 # This is the actual cookbook
 
 # bootstrap a debian system
-bootstrap "$buildroot" stretch armhf apt-transport-https ca-certificates locales systemd-sysv initramfs-tools busybox
+bootstrap "$buildroot" stretch armhf apt-transport-https ca-certificates locales systemd-sysv initramfs-tools busybox curl
 
 # add debian repos
 deleterepos "$buildroot" sources.list
-addrepo "$buildroot" sources.list http://httpredir.debian.org/debian stretch main non-free
-addrepo "$buildroot" sources.list http://httpredir.debian.org/debian stretch-updates main non-free
+addrepo "$buildroot" sources.list http://deb.debian.org/debian stretch main non-free
+addrepo "$buildroot" sources.list http://deb.debian.org/debian stretch-updates main non-free
 addrepo "$buildroot" sources.list http://security.debian.org/ stretch/updates main non-free
 # backports
-addrepo "$buildroot" sources.list http://ftp.debian.org/debian stretch-backports main non-free
+addrepo "$buildroot" sources.list http://deb.debian.org/debian stretch-backports main non-free
 
-# add BSP repo
+# add BSP repos
+addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/stretch/bsp-any ./
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/stretch/bsp-imx6 ./
-installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-imx6/all/solidrun-keyring_2018.04.05_all.deb
+installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/stretch/bsp-any/all/solidrun-keyring_2019.08.26_all.deb
 
 # mount /dev/root from fstab
 # Note: breaks flash-kernel package which expects a more meaningful value to include in initrd!
@@ -51,22 +52,25 @@ chroot_run "$buildroot" apt-get update
 update "$buildroot"
 
 # install HW support packages
-installpkg "$buildroot" bsp-cuboxi linux-image-4.9.y-imx6-sr
 installpkg "$buildroot" -t stretch-backports firmware-misc-nonfree
+installpkg "$buildroot" bsp-solidrun-imx6 linux-image-4.9.y-imx6-sr
 
 # install a bunch of useful applications
-installpkg "$buildroot" sudo openssh-server connman connman-curses-git nano psmisc ntfs-3g iw rfkill devmem2 usbutils pciutils i2c-tools mtd-utils command-not-found
+installpkg "$buildroot" sudo openssh-server connman nano psmisc ntfs-3g iw rfkill devmem2 usbutils pciutils i2c-tools mtd-utils command-not-found alsa-utils wget
 chroot_run "$buildroot" apt-file update
 chroot_run "$buildroot" update-command-not-found
 
-# Framebuffer GPU userspace
-installpkg "$buildroot" imx-gpu-viv-fb eglinfo-fb gstreamer1.0-imx-fb
+# generate additional entropy to speed up /dev/urandom and reduce boot time
+installpkg "$buildroot" haveged
+
+# install gpu userspace
+installpkg "$buildroot" imx-gpu-viv imx-gpu-viv-fb eglinfo-fb
+
+# install multimedia userspace
+installpkg "$buildroot" gstreamer1.0-imx-fb gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-alsa gstreamer1.0-tools
 
 # install X11 GUI
 #installpkg "$buildroot" xserver-xorg-core xinit imx-gpu-viv-x11 xserver-xorg-video-imx-viv
-
-# multimedia
-installpkg "$buildroot" gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-tools alsa-utils
 
 # install automatic filesystem expander script
 installpkg "$buildroot" expand-fs runonce parted
@@ -80,7 +84,7 @@ rm -fv "$buildroot"/etc/ssh/*_key{,.pub}
 chroot_run "$buildroot" runonce-helper add generate-ssh-keys /usr/sbin/dpkg-reconfigure openssh-server
 
 # add default user
-adduser "$buildroot" debian debian /bin/bash video sudo
+adduser "$buildroot" debian debian /bin/bash audio sudo video
 
 # set hostname
 sethostname "$buildroot" sr-imx6
@@ -90,6 +94,35 @@ chroot_run "$buildroot" systemctl set-default multi-user.target
 
 # spawn getty on serial port
 chroot_run "$buildroot" systemctl enable serial-getty@ttymxc0.service
+
+# enable watchdog
+sed -E -i "s;^#?RuntimeWatchdogSec=.*$;RuntimeWatchdogSec=60;g" "$buildroot/etc/systemd/system.conf"
+
+# make bootable (using debian flash-image)
+installpkg "$buildroot" flash-kernel
+sed -E -i "s;^LINUX_KERNEL_CMDLINE=.*$;LINUX_KERNEL_CMDLINE=\"log_level=7 net.ifnames=0\";g" "$buildroot/etc/default/flash-kernel"
+for dev in \
+	"SolidRun Cubox-i Dual/Quad" \
+	"SolidRun Cubox-i Dual/Quad (1.5som)" \
+	"SolidRun Cubox-i Dual/Quad (1.5som+emmc)" \
+	"SolidRun Cubox-i Solo/DualLite" \
+	"SolidRun Cubox-i Solo/DualLite (1.5som)" \
+	"SolidRun Cubox-i Solo/DualLite (1.5som+emmc)" \
+	"SolidRun HummingBoard2 Dual/Quad" \
+	"SolidRun HummingBoard2 Dual/Quad (1.5som)" \
+	"SolidRun HummingBoard2 Dual/Quad (1.5som+emmc)" \
+	"SolidRun HummingBoard2 Solo/DualLite" \
+	"SolidRun HummingBoard2 Solo/DualLite (1.5som)" \
+	"SolidRun HummingBoard2 Solo/DualLite (1.5som+emmc)" \
+	"SolidRun HummingBoard Dual/Quad" \
+	"SolidRun HummingBoard Dual/Quad (1.5som)" \
+	"SolidRun HummingBoard Dual/Quad (1.5som+emmc)" \
+	"SolidRun HummingBoard Solo/DualLite" \
+	"SolidRun HummingBoard Solo/DualLite (1.5som)" \
+	"SolidRun HummingBoard Solo/DualLite (1.5som+emmc)" \
+	; do
+	chroot_run "$buildroot" env FK_MACHINE=\"$dev\" flash-kernel
+done
 
 # remove traces of build-system
 cleanup "$buildroot"

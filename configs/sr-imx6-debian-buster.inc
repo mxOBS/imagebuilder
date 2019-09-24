@@ -27,8 +27,8 @@ bootstrap "$buildroot" buster armhf apt-transport-https ca-certificates locales 
 
 # add debian repos
 deleterepos "$buildroot" sources.list
-addrepo "$buildroot" sources.list http://httpredir.debian.org/debian buster main non-free
-addrepo "$buildroot" sources.list http://httpredir.debian.org/debian buster-updates main non-free
+addrepo "$buildroot" sources.list http://deb.debian.org/debian buster main non-free
+addrepo "$buildroot" sources.list http://deb.debian.org/debian buster-updates main non-free
 addrepo "$buildroot" sources.list http://security.debian.org/ buster/updates main non-free
 
 # add BSP repos
