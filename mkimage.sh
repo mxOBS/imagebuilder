@@ -154,12 +154,12 @@ rmdir $MOUNT
 MOUNT=
 
 printf "Checking filesystem: "
-fsck.ext4 -f ${LODEV}p1
+fsck.ext4 -f -p ${LODEV}p1 1>/dev/null
 test $? != 0 && exit 1
 printf "Done\n"
 
 printf "Patching filesystem UUID=$FSUUID to match fstab: "    
-tune2fs -U $FSUUID ${LODEV}p1
+tune2fs -U $FSUUID ${LODEV}p1 1>/dev/null
 test $? != 0 && exit 1
 printf "Done\n"
 
