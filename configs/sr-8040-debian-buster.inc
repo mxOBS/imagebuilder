@@ -30,10 +30,12 @@ deleterepos "$buildroot" sources.list
 addrepo "$buildroot" sources.list http://httpredir.debian.org/debian buster main non-free
 addrepo "$buildroot" sources.list http://httpredir.debian.org/debian buster-updates main non-free
 addrepo "$buildroot" sources.list http://security.debian.org/ buster/updates main non-free
+addrepo "$buildroot" sources.list http://deb.debian.org/debian buster-backports main non-free
 
 # add BSP repo
+addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/buster/bsp-any ./
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/buster/bsp-8040 ./
-installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/buster/bsp-8040/all/solidrun-keyring_2019.02.18_all.deb
+installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/buster/bsp-any/all/solidrun-keyring_2019.10.11_all.deb
 
 # full fstab with uuid and filesystem already decided
 FSUUID=$(uuidgen)
@@ -48,9 +50,9 @@ chroot_run "$buildroot" apt-get update
 update "$buildroot"
 
 # install HW support packages
-installpkg "$buildroot" flash-kernel runonce expand-fs parted linux-image-5.1.0-trunk-arm64-unsigned linux-headers-5.1.0-trunk-arm64 firmware-atheros bsp-solidrun-8040
+installpkg "$buildroot" flash-kernel runonce expand-fs parted firmware-atheros bsp-solidrun-8040
+installpkg "$buildroot" -t buster-backports linux-image-arm64
 install -v -m700 -o root -g root data/expand-rootfs.sh "$buildroot/etc/runonce.d/"
-install -v -m644 -o root -g root /home/josua/Downloads/armada-8040-clearfog-gt-8k.dtb "$buildroot/etc/flash-kernel/dtbs/"
 
 # install a bunch of useful applications
 installpkg "$buildroot" sudo openssh-server nano psmisc ntfs-3g iw rfkill usbutils pciutils i2c-tools mtd-utils command-not-found
@@ -80,10 +82,27 @@ install -v -m 644 -o root -g root data/interface-eth1 "$buildroot/etc/network/in
 # enable watchdog
 sed -i "s;^#?RuntimeWatchdogSec=.*;RuntimeWatchdogSec=60;g" "$buildroot/etc/systemd/system.conf"
 
-# make bootable
+# prepare for U-Boot
 sed -i "s;quiet;log_level=7 net.ifnames=0;g" "$buildroot/etc/default/flash-kernel"
 chroot_run "$buildroot" env FK_MACHINE=\"SolidRun ClearFog GT 8K\" flash-kernel
 chroot_run "$buildroot" env FK_MACHINE=\"Marvell 8040 MACCHIATOBin Double-shot\" flash-kernel
+
+# prepare for UEFI (GRUB)
+# create initial grub.cfg (will be rewritten on first boot)
+installpkg "$buildroot" grub-efi-arm64
+KVERSION=$(cd "$buildroot"; ls boot/vmlinuz-* | cut -d- -f1 --complement)
+mkdir -p "$buildroot/boot/efi/EFI/BOOT"
+cat > "$buildroot/boot/grub/grub.cfg" << EOF
+set timeout=5
+set default=0
+
+menuentry "Debian for SolidRun 8040 devices - First-Boot Stage" {
+	search --no-floppy --fs-uuid --set=root $FSUUID
+	linux /boot/vmlinuz-$KVERSION root=UUID=$FSUUID
+	initrd /boot/initrd.img-$KVERSION
+}
+EOF
+install -v -m700 -o root -g root data/grub-config.sh "$buildroot/etc/runonce.d/"
 
 # remove traces of build-system
 cleanup "$buildroot"
