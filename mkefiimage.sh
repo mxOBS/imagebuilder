@@ -21,6 +21,16 @@
 # THE SOFTWARE.
 # 
 
+# functions
+cpio_create_at() {
+	local root
+	root="$1"
+
+	cd "$root"
+	cpio -H newc -o
+	return $?
+}
+
 # args
 if [ $# != 2 ]; then
 	echo "Usage: $0 <system-archive> <size_in_megabytes>"
@@ -35,7 +45,7 @@ if [ "$UID" != 0 ]; then
 	exit 1
 fi
 
-progs="dd losetup fdisk tar mkfs.ext4 qemu-img mkimage partprobe"
+progs="dd losetup fdisk fsck.ext4 tar mkfs.ext4 mkfs.vfat qemu-img mkimage partprobe"
 for prog in $progs; do
 	which $prog 1>/dev/null 2>/dev/null
 	if [ $? != 0 ]; then
@@ -82,23 +92,23 @@ test $? != 0 && exit 1
 printf "Done\n"
 
 # create partitions
-# tiny EFI partition at 2048-16383
-# rootfs beyond (so it starts at 8192)
+# optimize for sdcards, and start at block 8192
+# p1: tiny EFI at 8192+4M
+# p2: rootfs   at 16384+N
 printf "Creating partition table: "
 echo "o
 n
 p
 1
-
-16383
+8192
++4M
+t
+ef
 n
 p
 2
+16384
 
-
-t
-1
-ef
 w
 q" | fdisk $LODEV 1>/dev/null 2>/dev/null
 printf "Done\n"
@@ -106,23 +116,23 @@ printf "Done\n"
 # reload partition table
 partprobe $LODEV
 
-# create filesystems
-printf "Creating new EFI filesystem: "
-mkfs.fat ${LODEV}p1 1>/dev/null 2>/dev/null
+# create EFI filesystems
+printf "Creating new efi filesystem: "
+mkfs.vfat -n EFI -F 12 ${LODEV}p1 1>/dev/null 2>/dev/null
 test $? != 0 && printf "Failed\n" && exit 1
 printf "Done\n"
 
+# create root filesystem
 printf "Creating new ext4 filesystem: "
 mkfs.ext4 -L rootfs ${LODEV}p2 1>/dev/null 2>/dev/null
 test $? != 0 && printf "Failed\n" && exit 1
+FS=ext4
 printf "Done\n"
 
-# mount root filesystem
+# mount filesystems
 MOUNT=linux
 mkdir $MOUNT
 mount ${LODEV}p2 $MOUNT
-
-# mount efi filesystem
 mkdir -p $MOUNT/boot/efi
 mount ${LODEV}p1 $MOUNT/boot/efi
 
@@ -132,47 +142,44 @@ tar -C $MOUNT --numeric-owner -xpf $archive
 test $? != 0 && exit 1
 printf "Done\n"
 
-# find efi filesystem uuid
+# find EFI uuid
 EFIUUID=$(lsblk -n -o UUID ${LODEV}p1)
 
-# find root filesystem uuid
-ROOTUUID=$(lsblk -n -o UUID ${LODEV}p2)
+# find rootfs uuid
+FSUUID=$(grep -o -E '^UUID=[a-zA-Z0-9-]+[ 	]+/[ 	]+.*' "$MOUNT/etc/fstab" | sed -r 's;^UUID=([a-z0-9-]+).*$;\1;g' | head -1)
+if [ -z "$FSUUID" ]; then
+	FSUUID=$(lsblk -n -o UUID ${LODEV}p2)
+fi
 
 # patch fstab replacing generic /dev/root name if any
-printf "Patching fstab with actual filesystem UUIDs: "
-sed -i "s;^/dev/root;UUID=$ROOTUUID;g" $MOUNT/etc/fstab
-test $? != 0 && exit 1
-# add mountpoint for EFI partition to fstab
-cat >> $MOUNT/etc/fstab << EOF
-UUID=$EFIUUID /boot/efi vfat umask=0002 0 0
-EOF
+printf "Patching fstab with actual rootfs UUID: "
+sed -i "s;^/dev/root;UUID=$FSUUID;g" $MOUNT/etc/fstab
 test $? != 0 && exit 1
 printf "Done\n"
 
-# install a firstboot grub efi image
-printf "Installing initial grub image: "
-FILE=$(mktemp)
-cat > $FILE << EOF
-set timeout=3
-set default=0
-menuentry "Default Kernel" {
-	search --no-floppy --fs-uuid --set root $ROOTUUID
-	linux /boot/Image root=UUID=$ROOTUUID rootwait console=ttyS0,115200n8
-	initrd /boot/initrd
-}
-EOF
-grub2-mkstandalone \
-	--directory=$MOUNT/usr/lib/grub/arm64-efi \
-	--locale-directory=$MOUNT/usr/share/locale \
-	-O arm64-efi \
-	--modules="acpi fdt part_msdos part_gpt fat ext2 search_fs_uuid" \
-	-o $MOUNT/boot/efi/efi/boot/bootaa64.efi \
-	"boot/grub/grub.cfg=$FILE"
-s=$?
-rm -f $FILE
-test $s != 0 && exit 1
+# patch debian initramfs with default root device
+printf "Patching initramfs with actual rootfs UUID: "
+mkdir -p "$MOUNT/tmp/rd/conf/conf.d"
+printf "ROOT=\"%s\"\n" "UUID=$FSUUID" > "$MOUNT/tmp/rd/conf/conf.d/default_root"
+echo conf/conf.d/default_root | cpio_create_at "$MOUNT/tmp/rd" 2>/dev/null | gzip >> "$MOUNT/boot/initrd"
+test $? != 0 && exit 1
+rm -rf "$MOUNT/tmp/rd"
 printf "Done\n"
-s=
+
+# patch fstab with EFI partition
+printf "Adding EFI partition to fstab: "
+echo "UUID=$EFIUUID /boot/efi vfat defaults 0 0" >> $MOUNT/etc/fstab
+printf "Done\n"
+
+printf "Creating EFI/BOOT/BOOTAA64.EFI: "
+cat > "$MOUNT/tmp/grub-early.cfg" << EOF || exit 1
+search --no-floppy --fs-uuid --set=root $FSUUID
+configfile /boot/grub/grub.cfg
+EOF
+mkdir -p "$MOUNT/boot/efi/EFI/BOOT" 1>/dev/null || exit 1
+grub2-mkimage -c "./$MOUNT/tmp/grub-early.cfg" -o "$MOUNT/boot/efi/EFI/BOOT/BOOTAA64.EFI" -O arm64-efi -d "$MOUNT/usr/lib/grub/arm64-efi" -p "" configfile normal acpi fdt part_gpt part_msdos fat ext2 search search_fs_uuid linux echo test help reboot 1>/dev/null || exit 1
+rm -f "$MOUNT/tmp/grub-early.cfg"
+printf "Done\n"
 
 # flush caches
 printf "Flushing kernel filesystem caches: "
@@ -184,6 +191,16 @@ umount ${LODEV}p1
 umount ${LODEV}p2
 rmdir $MOUNT
 MOUNT=
+
+printf "Checking filesystem: "
+fsck.ext4 -f -p ${LODEV}p2 1>/dev/null
+test $? != 0 && exit 1
+printf "Done\n"
+
+printf "Patching rootfs UUID=$FSUUID to match fstab: "    
+tune2fs -U $FSUUID ${LODEV}p2 1>/dev/null
+test $? != 0 && exit 1
+printf "Done\n"
 
 # detach loopback device
 losetup -d $LODEV
