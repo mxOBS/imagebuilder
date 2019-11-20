@@ -34,7 +34,7 @@ addrepo "$buildroot" sources.list http://security.debian.org/ buster/updates mai
 # add BSP repo
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/buster/bsp-any ./
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/buster/bsp-imx8 ./
-installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/buster/bsp-any/all/solidrun-keyring_2019.08.26_all.deb
+installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/buster/bsp-any/all/solidrun-keyring_2019.10.11_all.deb
 
 # full fstab with uuid and filesystem already decided
 FSUUID=$(uuidgen)
@@ -89,6 +89,7 @@ sed -i "s;^#?RuntimeWatchdogSec=.*;RuntimeWatchdogSec=60;g" "$buildroot/etc/syst
 installpkg "$buildroot" flash-kernel
 sed -E -i "s;^LINUX_KERNEL_CMDLINE=.*$;LINUX_KERNEL_CMDLINE=\"log_level=7 net.ifnames=0\";g" "$buildroot/etc/default/flash-kernel"
 for dev in \
+	"SolidRun i.MX8MM HummingBoard Pulse" \
 	"SolidRun i.MX8MQ HummingBoard Pulse" \
 	"SolidRun i.MX8MQ CuBox Pulse" \
 	; do
