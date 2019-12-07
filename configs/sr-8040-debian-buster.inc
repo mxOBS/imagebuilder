@@ -104,5 +104,17 @@ menuentry "Debian for SolidRun 8040 devices - First-Boot Stage" {
 EOF
 install -v -m700 -o root -g root data/grub-config.sh "$buildroot/etc/runonce.d/"
 
+# Create U-Boot Script on EFI partition for redirecting to real boot script
+# avoids running grub.efi from u-boot
+cat > "$buildroot/boot/efi/boot.txt" << EOF
+# redirect to second partition
+setenv distro_bootpart 2
+setenv prefix boot/
+setenv script boot.scr
+load \${devtype} \${devnum}:\${distro_bootpart} \${scriptaddr} \${prefix}\${script}
+source \${scriptaddr}
+EOF
+chroot_run "$buildroot" mkimage -A arm64 -O linux -T script -C none -a 0 -e 0 -d /boot/efi/boot.txt /boot/efi/boot.scr
+
 # remove traces of build-system
 cleanup "$buildroot"
