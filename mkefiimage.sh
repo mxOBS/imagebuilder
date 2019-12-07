@@ -161,7 +161,7 @@ printf "Done\n"
 printf "Patching initramfs with actual rootfs UUID: "
 mkdir -p "$MOUNT/tmp/rd/conf/conf.d"
 printf "ROOT=\"%s\"\n" "UUID=$FSUUID" > "$MOUNT/tmp/rd/conf/conf.d/default_root"
-echo conf/conf.d/default_root | cpio_create_at "$MOUNT/tmp/rd" 2>/dev/null | gzip >> "$MOUNT/boot/initrd"
+echo conf/conf.d/default_root | cpio_create_at "$MOUNT/tmp/rd" 2>/dev/null | gzip >> $MOUNT/boot/initrd.img-*
 test $? != 0 && exit 1
 rm -rf "$MOUNT/tmp/rd"
 printf "Done\n"
