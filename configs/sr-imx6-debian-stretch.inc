@@ -56,7 +56,7 @@ installpkg "$buildroot" -t stretch-backports firmware-misc-nonfree
 installpkg "$buildroot" bsp-solidrun-imx6 linux-image-4.9.y-imx6-sr
 
 # install a bunch of useful applications
-installpkg "$buildroot" sudo openssh-server connman nano psmisc ntfs-3g iw rfkill devmem2 usbutils pciutils i2c-tools mtd-utils command-not-found alsa-utils wget
+installpkg "$buildroot" --no-install-recommends sudo openssh-server connman nano psmisc ntfs-3g iw rfkill devmem2 usbutils pciutils i2c-tools mtd-utils command-not-found alsa-utils wget
 chroot_run "$buildroot" apt-file update
 chroot_run "$buildroot" update-command-not-found
 
@@ -67,7 +67,7 @@ installpkg "$buildroot" haveged
 installpkg "$buildroot" imx-gpu-viv imx-gpu-viv-fb eglinfo-fb
 
 # install multimedia userspace
-installpkg "$buildroot" gstreamer1.0-imx-fb gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-alsa gstreamer1.0-tools
+installpkg "$buildroot" --no-install-recommends gstreamer1.0-imx-fb gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-alsa gstreamer1.0-tools
 
 # install X11 GUI
 #installpkg "$buildroot" xserver-xorg-core xinit imx-gpu-viv-x11 xserver-xorg-video-imx-viv

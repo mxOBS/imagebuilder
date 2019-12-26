@@ -34,7 +34,7 @@ addrepo "$buildroot" sources.list http://security.debian.org/ buster/updates mai
 # add BSP repos
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/buster/bsp-any ./
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/buster/bsp-imx6 ./
-installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/buster/bsp-any/all/solidrun-keyring_2019.08.26_all.deb
+installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/buster/bsp-any/all/solidrun-keyring_2019.10.11_all.deb
 
 # mount /dev/root from fstab
 # Note: breaks flash-kernel package which expects a more meaningful value to include in initrd!
@@ -66,6 +66,11 @@ installpkg "$buildroot" imx-gpu-viv imx-gpu-viv-fb eglinfo-fb
 # install multimedia userspace
 installpkg "$buildroot" gstreamer1.0-imx-fb gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-alsa gstreamer1.0-tools
 
+if [ "x$flavour" == "xx11" ]; then
+	installpkg "$buildroot" --no-install-recommends imx-gpu-viv-x11 eglinfo-x11 gstreamer1.0-imx-x11 mesa-utils-extra
+	chroot_run "$buildroot" tasksel install desktop xfce-desktop
+fi
+
 # install automatic filesystem expander script
 installpkg "$buildroot" expand-fs runonce parted
 install -v -m 700 -o root -g root data/expand-rootfs.sh "$buildroot/etc/runonce.d/"
@@ -81,7 +86,11 @@ adduser "$buildroot" debian debian /bin/bash audio sudo video
 sethostname "$buildroot" sr-imx6
 
 # set default runlevel
-chroot_run "$buildroot" systemctl set-default multi-user.target
+if [ "x$flavour" == "xx11" ]; then
+	chroot_run "$buildroot" systemctl set-default graphical.target
+else
+	chroot_run "$buildroot" systemctl set-default multi-user.target
+fi
 
 # spawn getty on serial port
 chroot_run "$buildroot" systemctl enable serial-getty@ttymxc0.service
