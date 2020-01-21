@@ -90,6 +90,8 @@ printf "Done\n"
 
 # create partition
 # optimize for sdcards, and start at block 8192
+# gap for Clearfog GTR U-Boot Environment at 0x0f0000(inclusive)-0x100000(exclusive)
+# with sector size of 512: 1920-2048
 printf "Creating partition table: "
 echo "o
 n
