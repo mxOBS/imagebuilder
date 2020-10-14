@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image name="sr-imx6">
+	<description type="system">
+		<author>Josua Mayer</author>
+		<contact>support@solid-run.com</contact>
+		<specification>text</specification>
+	</description>
+	<preferences>
+		<version>0.1</version>
+		<packagemanager>apt-get</packagemanager>
+		<type image="ext4"/>
+		<keytable>us-intl</keytable>
+		<timezone>CET</timezone>
+		<locale>en_GB</locale>
+		<rpm-check-signatures>true</rpm-check-signatures>
+	</preferences>
+	<users>
+		<user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root" groups="root"/>
+	</users>
+	<repository type="apt-deb" distribution="buster" components="main non-free" repository_gpgcheck="true">
+		<source path="http://deb.debian.org/debian"/>
+	</repository>
+	<packages type="bootstrap">
+		<!-- additional, packages for debootstrap -->
+		<package name="apt-transport-https"/>
+		<package name="busybox"/>
+		<package name="ca-certificates"/>
+		<package name="curl"/>
+		<package name="locales"/>
+		<package name="initramfs-tools"/>
+		<package name="systemd-sysv"/>
+	</packages>
+	<packages type="image">
+		<!-- system packages: debian -->
+		<package name="alsa-utils"/>
+		<package name="command-not-found"/>
+		<package name="connman"/>
+		<package name="i2c-tools"/>
+		<package name="iw"/>
+		<package name="linux-image-armmp"/>
+		<package name="mtd-utils"/>
+		<package name="nano"/>
+		<package name="ntfs-3g"/>
+		<package name="openssh-server"/>
+		<package name="pciutils"/>
+		<package name="psmisc"/>
+		<package name="rfkill"/>
+		<package name="usbutils"/>
+		<package name="wget"/>
+	</packages>
+</image>
