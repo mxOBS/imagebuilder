@@ -33,8 +33,8 @@ addrepo "$buildroot" sources.list http://security.debian.org/debian-security bul
 
 # add BSP repo
 addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/bullseye/bsp-any ./
-addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/bullseye/bsp-imx8 ./
-installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/bullseye/bsp-any/all/solidrun-keyring_2020.10.13_all.deb
+addrepo "$buildroot" sources.list.d/solidrun.list https://repo.solid-build.xyz/debian/bullseye/bsp-imx8v2 ./
+installpkg_url "$buildroot" https://repo.solid-build.xyz/debian/bullseye/bsp-any/all/solidrun-keyring_2020.11.01_all.deb
 
 # full fstab with uuid and filesystem already decided
 FSUUID=$(uuidgen)
@@ -49,12 +49,11 @@ chroot_run "$buildroot" apt-get update
 update "$buildroot"
 
 # install HW support packages
-installpkg "$buildroot" bsp-solidrun-imx8 linux-image-4.19.y-imx8-sr
+installpkg "$buildroot" bsp-solidrun-imx8 linux-image-5.4.y-imx8-sr
 
 # install a bunch of useful applications
-installpkg "$buildroot" sudo openssh-server nano psmisc ntfs-3g iw rfkill devmem2 usbutils pciutils i2c-tools mtd-utils command-not-found alsa-utils wget
+installpkg "$buildroot" sudo openssh-server nano psmisc ntfs-3g iw rfkill devmem2 usbutils pciutils i2c-tools mtd-utils apt-file alsa-utils wget
 chroot_run "$buildroot" apt-file update
-chroot_run "$buildroot" update-command-not-found
 
 # generate additional entropy to speed up /dev/urandom and reduce boot time
 installpkg "$buildroot" haveged
@@ -91,9 +90,10 @@ installpkg "$buildroot" flash-kernel
 sed -E -i "s;^LINUX_KERNEL_CMDLINE=.*$;LINUX_KERNEL_CMDLINE=\"log_level=7 net.ifnames=0\";g" "$buildroot/etc/default/flash-kernel"
 for dev in \
 	"SolidRun i.MX8MQ HummingBoard Pulse (no wifi)" \
-	"SolidRun i.MX8MQ HummingBoard Pulse (new filename)" \
-	"SolidRun i.MX8MQ CuBox Pulse (new filename)" \
+	"SolidRun i.MX8MQ HummingBoard Pulse" \
+	"SolidRun i.MX8MQ CuBox Pulse" \
 	"SolidRun i.MX8MM HummingBoard Pulse" \
+	"SolidRun i.MX8MP HummingBoard Pulse" \
 	; do
 	chroot_run "$buildroot" env FK_MACHINE=\"$dev\" flash-kernel
 done
